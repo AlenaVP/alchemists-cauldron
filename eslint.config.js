@@ -24,10 +24,9 @@ export default defineConfig([
       '@typescript-eslint/restrict-template-expressions': ['error', { allowNumber: true }],
     },
   },
-  // Must be last: turns off rules that conflict with Prettier
   eslintConfigPrettier,
   {
-    files: ['eslint.config.js'],
+    files: ['**/*.js'],
     ...tseslint.configs.disableTypeChecked,
   },
 ]);
