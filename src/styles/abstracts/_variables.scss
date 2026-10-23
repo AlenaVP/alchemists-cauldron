@@ -1,0 +1,71 @@
+// Design tokens for Alchemist's Cauldron.
+// Source: Stitch screen "classic_desktop_ui" (chosen base design).
+// Static values only. Runtime values (bar fill, target zone) are CSS custom
+// properties set from TypeScript, because SCSS exists only at build time.
+
+// ---------- Surfaces (darkest → lightest) ----------
+$color-bg: #050807; // page background
+$color-bg-deep: #030604; // bar tracks
+$color-surface: #08100c; // large panels
+$color-panel: #0d1813; // panel fill
+$color-card: #122018; // ingredient card, gradient start
+$color-card-end: #0a140f; // ingredient card, gradient end
+$color-line: #2b4134; // card borders
+$color-line-muted: #1b2b20; // gauge borders
+
+// ---------- Gold ----------
+$color-gold: #e6c875; // score, title, gauge marker
+$color-gold-muted: #b8a074; // small labels on dark
+$color-gold-border: #8c733e; // panel and pill borders
+
+// ---------- Emerald glow (main accent) ----------
+$color-glow: #00ff88; // neon accents, timer
+$color-emerald: #10b981; // target zones, buttons
+$color-emerald-light: #34d399; // hover borders, current values
+
+// ---------- Parchment (recipe card, leaderboard) ----------
+$color-parchment: #f4ecd8;
+$color-parchment-dark: #e8dcbe;
+$color-parchment-border: #bfa77a;
+$color-ink: #2b2316; // text on parchment
+
+// ---------- Text on dark ----------
+$color-text: #f3f4f6;
+$color-text-muted: #9ca3af;
+
+// ---------- Parameters: chip text / chip background ----------
+$color-temp: #fb7185;
+$color-temp-bg: #450a0a;
+$color-density: #7dd3fc;
+$color-density-bg: #082f49;
+$color-magic: #d8b4fe;
+$color-magic-bg: #3b0764;
+
+// ---------- Game state ----------
+$color-life: #ef4444; // hearts
+$color-stock: #f59e0b; // stock badge
+$color-danger: #f43f5e; // timer < 15 s, failed brew
+
+// ---------- Typography ----------
+// Cinzel has only capital letterforms: good for titles and buttons,
+// tiring for paragraphs. Body text uses a readable classical serif.
+$font-display: 'Cinzel', Georgia, serif;
+$font-body: 'EB Garamond', Georgia, serif;
+
+// ---------- Radii ----------
+$radius-sm: 4px; // stat chips, gauge marker
+$radius-md: 6px; // gauge track
+$radius-lg: 12px; // ingredient cards, gauges
+$radius-xl: 16px; // main panels
+$radius-pill: 999px; // HUD pills, round buttons, badges
+
+// ---------- Shadows and glows ----------
+$glow-neon: 0 0 8px $color-glow;
+$glow-emerald: 0 0 8px rgb(16 185 129 / 50%);
+$glow-gold: 0 0 12px rgb(140 115 62 / 30%);
+$glow-life: 0 0 8px rgb(239 68 68 / 90%);
+$shadow-panel: 0 16px 32px rgb(0 0 0 / 95%);
+
+// ---------- Breakpoints (Stitch frames: 390 / 768 / 1280) ----------
+$bp-tablet: 768px;
+$bp-desktop: 1280px;
