@@ -1,7 +1,9 @@
+import { defineConfig } from 'eslint/config';
 import js from '@eslint/js';
 import tseslint from 'typescript-eslint';
+import eslintConfigPrettier from 'eslint-config-prettier';
 
-export default tseslint.config(
+export default defineConfig([
   { ignores: ['dist', 'coverage', 'node_modules'] },
   js.configs.recommended,
   ...tseslint.configs.strictTypeChecked,
@@ -13,7 +15,6 @@ export default tseslint.config(
       },
     },
     rules: {
-      // Penalties from the task: console.log, any, alert/confirm
       'no-console': 'error',
       'no-alert': 'error',
       '@typescript-eslint/no-explicit-any': 'error',
@@ -23,8 +24,10 @@ export default tseslint.config(
       '@typescript-eslint/restrict-template-expressions': ['error', { allowNumber: true }],
     },
   },
+  // Must be last: turns off rules that conflict with Prettier
+  eslintConfigPrettier,
   {
     files: ['eslint.config.js'],
     ...tseslint.configs.disableTypeChecked,
   },
-);
+]);
