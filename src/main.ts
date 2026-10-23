@@ -1,3 +1,5 @@
+import './styles/main.scss';
+
 const root = document.querySelector<HTMLDivElement>('#app');
 
 if (root) {

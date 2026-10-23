@@ -1,0 +1,31 @@
+@use '../abstracts/variables' as *;
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  min-height: 100vh;
+  font-family: $font-body;
+  font-size: 1.0625rem;
+  line-height: 1.5;
+  color: $color-text;
+  background: radial-gradient(ellipse at 50% 40%, rgb(0 255 136 / 7%), transparent 60%), $color-bg;
+}
+
+h1,
+h2,
+h3 {
+  font-family: $font-display;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
