@@ -1,0 +1,53 @@
+@use '../abstracts/variables' as *;
+@use '../abstracts/mixins' as *;
+
+// Sticky on small screens, so Brew is always under the thumb
+.controls {
+  position: sticky;
+  bottom: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 10px 0 12px;
+  background: linear-gradient(180deg, transparent, $color-bg 30%);
+
+  @include desktop {
+    position: static;
+    gap: 24px;
+    padding: 4px 0 20px;
+    background: none;
+  }
+}
+
+.main-action {
+  @include focus-ring;
+
+  flex: 1;
+  max-width: 560px;
+  min-height: 60px;
+  padding: 0 24px;
+  font-family: $font-display;
+  font-size: clamp(1.1rem, 4vw, 1.6rem);
+  font-weight: 900;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: $color-glow;
+  background: linear-gradient(180deg, #0f3324, #082016);
+  border: 2px solid $color-gold;
+  border-radius: $radius-lg;
+  box-shadow: 0 0 18px rgb(0 255 136 / 30%);
+  transition:
+    box-shadow 0.2s ease,
+    opacity 0.2s ease;
+
+  &:hover:not(:disabled) {
+    box-shadow: 0 0 28px rgb(0 255 136 / 55%);
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    box-shadow: none;
+  }
+}

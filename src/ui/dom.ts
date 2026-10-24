@@ -1,3 +1,5 @@
+import type { IGameState } from '../types/game';
+
 type Child = Node | string | null | false;
 
 interface IElementOptions {
@@ -35,4 +37,10 @@ export function setStyleVar(element: HTMLElement, name: string, value: string): 
   if (element.style.getPropertyValue(name) !== value) {
     element.style.setProperty(name, value);
   }
+}
+
+/** Every UI part creates its element once and then updates it from the state. */
+export interface IComponent {
+  element: HTMLElement;
+  update: (state: IGameState) => void;
 }

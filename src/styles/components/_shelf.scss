@@ -1,0 +1,202 @@
+@use '../abstracts/variables' as *;
+@use '../abstracts/mixins' as *;
+
+.shelf__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+
+  @include desktop {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+  }
+}
+
+.shelf__slot {
+  min-width: 0;
+}
+
+.shelf__slot--placeholder {
+  min-height: 74px;
+  border: 1px dashed $color-line;
+  border-radius: $radius-lg;
+  opacity: 0.5;
+}
+
+.ingredient {
+  @include focus-ring;
+
+  position: relative;
+  display: grid;
+  grid-template-areas:
+    'icon name'
+    'stats stats';
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  column-gap: 8px;
+  row-gap: 8px;
+  width: 100%;
+  min-height: 74px;
+  padding: 10px 12px;
+  text-align: left;
+  background: linear-gradient(90deg, $color-card, $color-card-end);
+  border: 1px solid $color-line;
+  border-radius: $radius-lg;
+  transition:
+    border-color 0.2s ease,
+    transform 0.1s ease,
+    opacity 0.2s ease;
+
+  &:hover:not(:disabled) {
+    border-color: $color-emerald-light;
+  }
+
+  &:active:not(:disabled) {
+    transform: scale(0.97);
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+  }
+
+  @include tablet {
+    grid-template-areas:
+      'icon name'
+      'icon stats';
+    column-gap: 10px;
+    row-gap: 4px;
+  }
+}
+
+.ingredient__icon {
+  grid-area: icon;
+  width: 34px;
+  height: 34px;
+  padding: 6px;
+  background: $color-bg;
+  border: 1px solid $color-line-muted;
+  border-radius: $radius-md;
+
+  @include tablet {
+    width: 40px;
+    height: 40px;
+    padding: 7px;
+  }
+}
+
+.ingredient__name {
+  grid-area: name;
+  padding-right: 22px;
+  font-family: $font-display;
+  font-size: 0.82rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: $color-text;
+}
+
+.ingredient__stats {
+  grid-area: stats;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.chip {
+  @include tabular-numbers;
+
+  padding: 1px 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.4;
+  border: 1px solid;
+  border-radius: $radius-sm;
+}
+
+.chip--temp {
+  color: $color-temp;
+  background: $color-temp-bg;
+  border-color: rgb(251 113 133 / 35%);
+}
+
+.chip--density {
+  color: $color-density;
+  background: $color-density-bg;
+  border-color: rgb(125 211 252 / 35%);
+}
+
+.chip--magic {
+  color: $color-magic;
+  background: $color-magic-bg;
+  border-color: rgb(216 180 254 / 35%);
+}
+
+.ingredient__stock {
+  @include tabular-numbers;
+
+  position: absolute;
+  top: -8px;
+  right: -6px;
+  display: grid;
+  place-items: center;
+  min-width: 26px;
+  height: 26px;
+  padding: 0 6px;
+  font-family: $font-display;
+  font-size: 0.75rem;
+  font-weight: 900;
+  color: #1a1206;
+  background: $color-stock;
+  border-radius: $radius-pill;
+  box-shadow: 0 2px 6px rgb(0 0 0 / 60%);
+}
+
+// Stock 0: no icon, dimmed, badge 0, the slot stays in place
+.ingredient--empty {
+  opacity: 0.35;
+
+  .ingredient__icon svg {
+    visibility: hidden;
+  }
+
+  .ingredient__stock {
+    color: $color-text-muted;
+    background: $color-line;
+  }
+}
+
+.shelf--blocked .ingredient:not(.ingredient--empty) {
+  opacity: 0.6;
+}
+
+// Ingredient colours
+.icon--drop {
+  color: #38bdf8;
+}
+
+.icon--sparkle {
+  color: #fde68a;
+}
+
+.icon--snowflake {
+  color: #bae6fd;
+}
+
+.icon--leaf {
+  color: #4ade80;
+}
+
+.icon--flask {
+  color: #a3e635;
+}
+
+.icon--moon {
+  color: #c084fc;
+}
+
+.icon--flame {
+  color: #fb923c;
+}
+
+.icon--toad {
+  color: #84cc16;
+}
