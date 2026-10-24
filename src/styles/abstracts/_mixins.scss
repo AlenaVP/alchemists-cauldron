@@ -1,0 +1,34 @@
+@use 'variables' as *;
+
+// Mobile-first breakpoints: styles without a mixin are for 375 px+
+@mixin tablet {
+  @media (min-width: $bp-tablet) {
+    @content;
+  }
+}
+
+@mixin desktop {
+  @media (min-width: $bp-desktop) {
+    @content;
+  }
+}
+
+// Visible keyboard focus for every interactive element
+@mixin focus-ring {
+  &:focus-visible {
+    outline: 2px solid $color-glow;
+    outline-offset: 3px;
+  }
+}
+
+// Numbers that change often (timer, score, gauges) keep the same width
+@mixin tabular-numbers {
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+@mixin panel {
+  background: linear-gradient(180deg, $color-panel, $color-surface);
+  border: 2px solid rgb(140 115 62 / 60%);
+  border-radius: $radius-xl;
+  box-shadow: $shadow-panel;
+}
