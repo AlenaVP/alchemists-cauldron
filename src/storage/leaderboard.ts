@@ -1,19 +1,20 @@
 import { addEntry, parseEntries } from '../logic/leaderboard-rules';
-import type { ILeaderboardEntry } from '../types/game';
+import type { Difficulty, ILeaderboardEntry } from '../types/game';
 import { readJson, removeKey, writeJson } from './safe-storage';
 
-const LEADERBOARD_KEY = 'alchemists-cauldron:leaderboard';
+/** US 2.1: one Top-10 list per difficulty. */
+const getKey = (difficulty: Difficulty): string => `alchemists-cauldron:leaderboard:${difficulty}`;
 
-export function loadLeaderboard(): ILeaderboardEntry[] {
-  return parseEntries(readJson(LEADERBOARD_KEY));
+export function loadLeaderboard(difficulty: Difficulty): ILeaderboardEntry[] {
+  return parseEntries(readJson(getKey(difficulty))).filter((entry) => entry.difficulty === difficulty);
 }
 
 export function saveResult(entry: ILeaderboardEntry): ILeaderboardEntry[] {
-  const entries = addEntry(loadLeaderboard(), entry);
-  writeJson(LEADERBOARD_KEY, entries);
+  const entries = addEntry(loadLeaderboard(entry.difficulty), entry);
+  writeJson(getKey(entry.difficulty), entries);
   return entries;
 }
 
-export function clearLeaderboard(): void {
-  removeKey(LEADERBOARD_KEY);
+export function clearLeaderboard(difficulty: Difficulty): void {
+  removeKey(getKey(difficulty));
 }
