@@ -24,7 +24,6 @@ export function createGameOverDialog(): void {
   const reason = el('p', { className: 'dialog__reason' });
   const score = el('p', { className: 'dialog__score' });
 
-  // US 1.6: ask for a name only when the score gets into the Top-10
   const input = el('input', {
     className: 'input',
     attrs: {
@@ -66,7 +65,7 @@ export function createGameOverDialog(): void {
       difficulty: currentState.difficulty,
     });
     form.hidden = true;
-    showLeaderboard(date);
+    showLeaderboard(currentState.difficulty, date);
   });
 
   const leaderboard = el('button', {
@@ -75,7 +74,7 @@ export function createGameOverDialog(): void {
     attrs: { type: 'button' },
   });
   leaderboard.addEventListener('click', () => {
-    showLeaderboard();
+    if (currentState) showLeaderboard(currentState.difficulty);
   });
 
   const playAgain = el('button', {
@@ -111,7 +110,7 @@ export function createGameOverDialog(): void {
       // A new game over (not a return from the leaderboard): reset the form
       if (state !== currentState) {
         currentState = state;
-        form.hidden = !qualifiesForLeaderboard(loadLeaderboard(), state.score);
+        form.hidden = !qualifiesForLeaderboard(loadLeaderboard(state.difficulty), state.score);
         input.value = '';
         setText(error, '');
       }

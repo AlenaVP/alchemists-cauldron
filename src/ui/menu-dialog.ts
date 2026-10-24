@@ -1,5 +1,6 @@
 import { DIFFICULTY_SETTINGS } from '../data/difficulty';
 import { selectDifficulty, startNewGame } from '../state/game-controller';
+import { getState } from '../state/store';
 import type { Difficulty, IDifficultySettings, IGameState } from '../types/game';
 import { createDialog } from './dialog';
 import { closeAllDialogs, registerDialog } from './dialog-manager';
@@ -51,7 +52,7 @@ export function createMenuDialog(): void {
     attrs: { type: 'button' },
   });
   leaderboard.addEventListener('click', () => {
-    showLeaderboard();
+    showLeaderboard(getState().difficulty);
   });
 
   dialog.body.append(

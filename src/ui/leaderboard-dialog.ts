@@ -1,14 +1,19 @@
+import { DIFFICULTY_SETTINGS } from '../data/difficulty';
 import { formatDate } from '../logic/format';
 import { clearLeaderboard, loadLeaderboard } from '../storage/leaderboard';
-import type { ILeaderboardEntry } from '../types/game';
+import type { Difficulty, ILeaderboardEntry } from '../types/game';
 import { createDialog } from './dialog';
 import { closeDialog, openDialog, registerDialog } from './dialog-manager';
-import { el } from './dom';
+import { el, setText } from './dom';
 
-/** Date of the result to highlight after saving a name. */
+const DIFFICULTIES: readonly Difficulty[] = ['easy', 'medium', 'hard'];
+
+/** The list that is shown, and the result to highlight after saving a name. */
+let shownDifficulty: Difficulty = 'medium';
 let highlightDate: number | null = null;
 
-export function showLeaderboard(highlight: number | null = null): void {
+export function showLeaderboard(difficulty: Difficulty, highlight: number | null = null): void {
+  shownDifficulty = difficulty;
   highlightDate = highlight;
   openDialog('leaderboard');
 }
@@ -18,6 +23,10 @@ function createRow(entry: ILeaderboardEntry, index: number): HTMLTableRowElement
     el('td', { className: 'leaderboard__rank', text: String(index + 1) }),
     el('td', { className: 'leaderboard__name', text: entry.name }),
     el('td', { className: 'leaderboard__score', text: String(entry.score) }),
+    el('td', {
+      className: 'leaderboard__difficulty',
+      text: DIFFICULTY_SETTINGS[entry.difficulty].label,
+    }),
     el('td', { className: 'leaderboard__date', text: formatDate(entry.date) }),
   ]);
   row.classList.toggle('leaderboard__row--new', entry.date === highlightDate);
@@ -26,27 +35,28 @@ function createRow(entry: ILeaderboardEntry, index: number): HTMLTableRowElement
 
 function createConfirmDialog(): void {
   const dialog = createDialog({ id: 'confirm-clear', title: 'Clear Leaderboard?', closable: true });
+  const text = el('p', { className: 'dialog__text' });
   const confirm = el('button', {
     className: 'button button--danger',
     text: 'Clear',
     attrs: { type: 'button' },
   });
   confirm.addEventListener('click', () => {
-    clearLeaderboard();
+    clearLeaderboard(shownDifficulty);
     closeDialog();
   });
   const cancel = el('button', { className: 'button', text: 'Cancel', attrs: { type: 'button' } });
   cancel.addEventListener('click', () => {
     closeDialog();
   });
-  dialog.body.append(
-    el('p', {
-      className: 'dialog__text',
-      text: 'All saved results will be deleted. This cannot be undone.',
-    }),
-    el('div', { className: 'dialog__actions' }, [cancel, confirm]),
-  );
-  registerDialog('confirm-clear', { dialog });
+  dialog.body.append(text, el('div', { className: 'dialog__actions' }, [cancel, confirm]));
+  registerDialog('confirm-clear', {
+    dialog,
+    update: () => {
+      const label = DIFFICULTY_SETTINGS[shownDifficulty].label;
+      setText(text, `All ${label} results will be deleted. This cannot be undone.`);
+    },
+  });
 }
 
 export function createLeaderboardDialog(): void {
@@ -56,17 +66,30 @@ export function createLeaderboardDialog(): void {
     closable: true,
     className: 'dialog--wide',
   });
+
+  const tabs = DIFFICULTIES.map((difficulty) => {
+    const tab = el('button', {
+      className: 'leaderboard__tab',
+      text: DIFFICULTY_SETTINGS[difficulty].label,
+      attrs: { type: 'button', 'aria-pressed': 'false', 'data-difficulty': difficulty },
+    });
+    tab.addEventListener('click', () => {
+      shownDifficulty = difficulty;
+      render();
+    });
+    return tab;
+  });
+
   const rows = el('tbody');
   const empty = el('p', { className: 'dialog__text', text: 'No results yet. Brew some potions!' });
   const table = el('div', { className: 'leaderboard__scroll' }, [
     el('table', { className: 'leaderboard' }, [
       el('thead', {}, [
-        el('tr', {}, [
-          el('th', { text: 'Rank', attrs: { scope: 'col' } }),
-          el('th', { text: 'Name', attrs: { scope: 'col' } }),
-          el('th', { text: 'Score', attrs: { scope: 'col' } }),
-          el('th', { text: 'Date', attrs: { scope: 'col' } }),
-        ]),
+        el(
+          'tr',
+          {},
+          ['Rank', 'Name', 'Score', 'Difficulty', 'Date'].map((title) => el('th', { text: title, attrs: { scope: 'col' } })),
+        ),
       ]),
       rows,
     ]),
@@ -85,17 +108,24 @@ export function createLeaderboardDialog(): void {
     closeDialog();
   });
 
-  dialog.body.append(table, empty, el('div', { className: 'dialog__actions' }, [clear, back]));
+  dialog.body.append(
+    el('div', { className: 'leaderboard__tabs', attrs: { role: 'group', 'aria-label': 'Difficulty' } }, tabs),
+    table,
+    empty,
+    el('div', { className: 'dialog__actions' }, [clear, back]),
+  );
 
-  registerDialog('leaderboard', {
-    dialog,
-    update: () => {
-      const entries = loadLeaderboard();
-      rows.replaceChildren(...entries.map(createRow));
-      table.hidden = entries.length === 0;
-      empty.hidden = entries.length > 0;
-      clear.disabled = entries.length === 0;
-    },
-  });
+  function render(): void {
+    tabs.forEach((tab) => {
+      tab.setAttribute('aria-pressed', String(tab.dataset.difficulty === shownDifficulty));
+    });
+    const entries = loadLeaderboard(shownDifficulty);
+    rows.replaceChildren(...entries.map(createRow));
+    table.hidden = entries.length === 0;
+    empty.hidden = entries.length > 0;
+    clear.disabled = entries.length === 0;
+  }
+
+  registerDialog('leaderboard', { dialog, update: render });
   createConfirmDialog();
 }
