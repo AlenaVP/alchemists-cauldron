@@ -6,8 +6,10 @@ import { createControls } from './controls';
 import { syncDialogs } from './dialog-manager';
 import { el, type IComponent } from './dom';
 import { createGameOverDialog } from './game-over-dialog';
+import { createHelpDialog } from './help-dialog';
 import { createHud } from './hud';
 import { createLeaderboardDialog } from './leaderboard-dialog';
+import { createMenuDialog } from './menu-dialog';
 import { createPauseDialog } from './pause-dialog';
 import { createRecipePanel } from './recipe-panel';
 import { createShelf } from './shelf';
@@ -28,6 +30,8 @@ export function mountApp(root: HTMLElement): void {
   createPauseDialog();
   createGameOverDialog();
   createLeaderboardDialog();
+  createMenuDialog();
+  createHelpDialog();
 
   const components: IComponent[] = [hud, shelf, cauldron, recipe, bars, controls];
   const render = (state: IGameState): void => {

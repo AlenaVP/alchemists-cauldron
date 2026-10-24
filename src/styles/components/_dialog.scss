@@ -4,6 +4,7 @@
 .dialog {
   width: min(calc(100% - 24px), 520px);
   max-height: calc(100vh - 24px);
+  overflow-y: auto;
   padding: 0;
   color: $color-text;
   background: transparent;
@@ -134,5 +135,38 @@
 
   .button {
     flex: none;
+  }
+}
+
+.rules {
+  display: grid;
+  gap: 10px;
+  width: 100%;
+  text-align: left;
+  counter-reset: rule;
+}
+
+.rules__item {
+  position: relative;
+  padding: 10px 12px 10px 48px;
+  background: $color-card-end;
+  border: 1px solid $color-line;
+  border-radius: $radius-md;
+  counter-increment: rule;
+
+  &::before {
+    content: counter(rule);
+    position: absolute;
+    top: 10px;
+    left: 12px;
+    display: grid;
+    place-items: center;
+    width: 26px;
+    height: 26px;
+    font-family: $font-display;
+    font-weight: 900;
+    color: $color-glow;
+    border: 1px solid $color-emerald;
+    border-radius: $radius-sm;
   }
 }
