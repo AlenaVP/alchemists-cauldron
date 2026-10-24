@@ -1,7 +1,10 @@
 import './styles/main.scss';
+import { initAutoPause } from './state/game-controller';
+import { mountApp } from './ui/app';
 
 const root = document.querySelector<HTMLDivElement>('#app');
 
 if (root) {
-  root.textContent = "Alchemist's Cauldron";
+  mountApp(root);
+  initAutoPause();
 }

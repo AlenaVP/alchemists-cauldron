@@ -1,0 +1,99 @@
+@use '../abstracts/variables' as *;
+@use '../abstracts/mixins' as *;
+
+#app {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 1440px;
+  min-height: 100vh;
+  margin: 0 auto;
+  padding: 12px 12px 0;
+
+  @include desktop {
+    gap: 16px;
+    padding: 16px 20px 0;
+  }
+}
+
+.title {
+  font-size: clamp(1.15rem, 4.5vw, 2rem);
+  font-weight: 900;
+  letter-spacing: 0.18em;
+  text-align: center;
+  text-transform: uppercase;
+  color: $color-gold;
+  text-shadow: 0 0 18px rgb(230 200 117 / 25%);
+}
+
+.board {
+  display: grid;
+  grid-template-areas:
+    'recipe'
+    'cauldron'
+    'gauges'
+    'shelf';
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+  transition: filter 0.3s ease;
+
+  @include tablet {
+    grid-template-areas:
+      'cauldron recipe'
+      'gauges gauges'
+      'shelf shelf';
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  }
+
+  @include desktop {
+    grid-template-areas:
+      'shelf cauldron recipe'
+      'gauges gauges gauges';
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr) minmax(0, 1.1fr);
+    gap: 16px;
+  }
+}
+
+.shelf {
+  grid-area: shelf;
+}
+
+.cauldron {
+  grid-area: cauldron;
+}
+
+.panel {
+  @include panel;
+
+  padding: 14px;
+}
+
+.panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding-bottom: 10px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid $color-line-muted;
+}
+
+.panel__title {
+  font-size: 0.95rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: $color-gold;
+}
+
+.panel__hint {
+  font-family: $font-display;
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: $color-emerald-light;
+}
+
+.is-paused .board {
+  pointer-events: none;
+  filter: blur(10px) grayscale(0.4);
+}
