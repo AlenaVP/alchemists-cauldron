@@ -7,6 +7,7 @@ import { syncDialogs } from './dialog-manager';
 import { el, type IComponent } from './dom';
 import { createGameOverDialog } from './game-over-dialog';
 import { createHud } from './hud';
+import { createLeaderboardDialog } from './leaderboard-dialog';
 import { createPauseDialog } from './pause-dialog';
 import { createRecipePanel } from './recipe-panel';
 import { createShelf } from './shelf';
@@ -26,13 +27,13 @@ export function mountApp(root: HTMLElement): void {
 
   createPauseDialog();
   createGameOverDialog();
+  createLeaderboardDialog();
 
   const components: IComponent[] = [hud, shelf, cauldron, recipe, bars, controls];
   const render = (state: IGameState): void => {
     components.forEach((component) => {
       component.update(state);
     });
-    // US 1.5: blur the play field so the player cannot plan moves during pause
     root.classList.toggle('is-paused', state.status === 'paused');
     syncDialogs(state);
   };

@@ -64,3 +64,11 @@ export interface IGameState {
   lastBrew: BrewResult | null;
   gameOverReason: GameOverReason | null;
 }
+
+export interface ILeaderboardEntry {
+  name: string;
+  score: number;
+  /** Timestamp of the result */
+  date: number;
+  difficulty: Difficulty;
+}
