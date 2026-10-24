@@ -26,7 +26,6 @@
   text-shadow: 0 0 18px rgb(230 200 117 / 25%);
 }
 
-// Mobile: recipe → cauldron → gauges → shelf. Desktop: shelf | cauldron | recipe, gauges below.
 .board {
   display: grid;
   grid-template-areas:
@@ -92,4 +91,9 @@
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: $color-emerald-light;
+}
+
+.is-paused .board {
+  pointer-events: none;
+  filter: blur(10px) grayscale(0.4);
 }

@@ -66,3 +66,33 @@
     height: 100%;
   }
 }
+
+.icon-button {
+  @include focus-ring;
+
+  display: inline-grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  color: $color-gold;
+  background: linear-gradient(180deg, #1c1810, #120f09);
+  border: 1px solid $color-gold-border;
+  border-radius: 50%;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+
+  &:hover:not(:disabled) {
+    border-color: $color-gold;
+    box-shadow: $glow-gold;
+  }
+
+  &[hidden] {
+    display: none;
+  }
+
+  .icon {
+    width: 20px;
+    height: 20px;
+  }
+}

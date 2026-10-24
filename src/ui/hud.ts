@@ -1,5 +1,6 @@
 import { LOW_TIME_THRESHOLD } from '../data/difficulty';
 import { formatTime, secondsToMs } from '../logic/timer';
+import { pause } from '../state/game-controller';
 import { getSettings } from '../state/game-state';
 import type { IGameState } from '../types/game';
 import { el, setStyleVar, setText, type IComponent } from './dom';
@@ -18,6 +19,15 @@ export function createHud(): IComponent {
     time,
   ]);
 
+  const pauseButton = el(
+    'button',
+    { className: 'icon-button hud__pause', attrs: { type: 'button', 'aria-label': 'Pause' } },
+    [createIcon('pause')],
+  );
+  pauseButton.addEventListener('click', () => {
+    pause();
+  });
+
   const element = el('header', { className: 'hud' }, [
     el('div', { className: 'hud__pill hud__score' }, [
       createIcon('star'),
@@ -25,7 +35,7 @@ export function createHud(): IComponent {
       score,
     ]),
     el('div', { className: 'hud__center' }, [
-      el('div', { className: 'hud__timer-row' }, [timer]),
+      el('div', { className: 'hud__timer-row' }, [timer, pauseButton]),
       el('span', { className: 'hud__time-track', attrs: { 'aria-hidden': 'true' } }, [timeBar]),
     ]),
     el('div', { className: 'hud__pill hud__lives' }, [
@@ -41,6 +51,7 @@ export function createHud(): IComponent {
     const settings = getSettings(state);
     const isRunning = state.status !== 'menu';
 
+    pauseButton.hidden = state.status !== 'playing';
     setText(score, String(state.score));
     setText(time, formatTime(state.timeLeft));
 
@@ -50,7 +61,6 @@ export function createHud(): IComponent {
       (state.status === 'playing' || state.status === 'paused') && state.timeLeft < secondsToMs(LOW_TIME_THRESHOLD);
     element.classList.toggle('hud--low-time', isLow);
 
-    // Start screen: no life icons yet. During play: lost lives are dimmed.
     const livesKey = isRunning ? `${String(state.lives)}/${String(settings.lives)}` : '';
     if (livesKey !== renderedLives) {
       renderedLives = livesKey;
