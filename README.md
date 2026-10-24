@@ -16,6 +16,38 @@ You are an alchemist with a cauldron, a shelf of ingredients and a ticking clock
 
 **Goal:** brew as many potions as you can before the time, the lives or the ingredients run out, and get into the Top-10 leaderboard.
 
+## How to play
+
+1. Press **Start Game**. You get a random recipe and a shelf with a random stock of every ingredient (2–15 portions).
+2. Click ingredient cards to add them to the cauldron. The counter **Ingredients: n / 4** shows how full it is; at the maximum the shelf is blocked.
+3. Watch the 3 bars. The bright green zone is the recipe range, the faint zone around it is the allowed tolerance, the gold marker is the current value. A bar glows when its value is inside the recipe range.
+4. Press **Brew**. Every value may miss its range by the tolerance (±8 on Medium).
+   - Success: +200 points, +10 s (time never goes above 120 s by a bonus) and a new recipe.
+   - Failure: −1 life.
+   - In both cases the used ingredients are spent.
+5. The game ends when the time reaches `00:00`, the lives run out, or the shelf and the cauldron are both empty (**Out of ingredients**).
+6. If the score gets into the Top-10, enter a name (2–15 characters: letters, digits, space, `_`, `-`).
+
+Controls: **Pause** next to the timer, **Help** and **Menu** (new game, leaderboard) at the bottom. The game pauses automatically when the browser tab is hidden.
+
+## Implemented features
+
+### Level 1 — Basic
+
+- [x] Start screen: empty shelf and cauldron, score and time `0`, no lives, centered **Start Game**, Help and Menu
+- [x] US 1.1 Shelf with 6 ingredients (SVG icons, 3 numbers, random stock badge), empty slots at stock 0, cauldron keeps the order, max 4
+- [x] US 1.2 Three bars with negative values (0 in the center), smooth CSS transitions, target zone, marker, green glow
+- [x] US 1.3 20 recipes, random pick by difficulty, ingredient counter with highlight at the maximum, Brew check with ±8
+- [x] US 1.4 Timer from `Date.now()` timestamps, `MM:SS` + shrinking bar, red pulse below 15 s, lives, Game Over with the reason and **Play again**
+- [x] US 1.5 Pause with blurred field, **Resume** / **Exit to Menu**, auto-pause on a hidden tab
+- [x] US 1.6 Top-10 leaderboard in `localStorage`, name validation, `DD.MM.YYYY HH:MM`, clear with an in-app confirmation; broken data never crashes the game
+
+### Rule decisions
+
+- **Time bonus.** US 1.3 says "add 10 s up to 120 s", US 1.4 says "never above the start time". The game caps the bonus at 120 s (this satisfies both) and a success never takes time away: at 145 s a success keeps 145 s.
+- **Leaderboard.** A result gets in when the score is above 0 and either the list has fewer than 10 entries or the score is higher than the 10th place (an equal score would rank below the earlier result).
+- **Bar scales.** Temperature −100..100, Density −80..80 (0 in the center), Magic Power 0..100. Values outside the scale keep the marker at the edge, the exact number is shown above the bar.
+
 ## Task structure
 
 | Stage          | Content                                                           | Branch      |
@@ -46,6 +78,7 @@ npm run build      # type check + production build into dist/
 npm run preview    # serve the production build
 npm run lint       # ESLint
 npm run format     # Prettier (write), format:check to only check
+npm test           # unit tests for the game rules (Vitest)
 ```
 
 ## Project structure
