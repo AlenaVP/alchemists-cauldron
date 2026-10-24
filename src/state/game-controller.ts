@@ -79,6 +79,13 @@ export function resume(): void {
   startTimer();
 }
 
+/** US 2.1: the difficulty can be changed only on the start screen. */
+export function selectDifficulty(difficulty: Difficulty): void {
+  if (getState().status === 'menu') {
+    setState(createMenuState(difficulty));
+  }
+}
+
 export function exitToMenu(): void {
   stopTimer();
   setState(createMenuState(getState().difficulty));
