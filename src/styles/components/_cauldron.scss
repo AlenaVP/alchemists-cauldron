@@ -1,0 +1,160 @@
+@use '../abstracts/variables' as *;
+@use '../abstracts/mixins' as *;
+
+.cauldron {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 300px;
+  background:
+    radial-gradient(circle at 50% 45%, rgb(0 255 136 / 12%), transparent 65%),
+    linear-gradient(180deg, $color-panel, $color-surface);
+}
+
+.cauldron__visual {
+  position: relative;
+  width: min(100%, 260px);
+
+  @include desktop {
+    width: min(100%, 320px);
+  }
+}
+
+.cauldron__svg {
+  display: block;
+  width: 100%;
+  filter: drop-shadow(0 0 22px rgb(0 255 136 / 25%));
+}
+
+.cauldron__rune {
+  stroke: $color-glow;
+  filter: drop-shadow(0 0 6px $color-glow);
+
+  circle:last-child {
+    fill: $color-glow;
+  }
+}
+
+.cauldron--cold {
+  .cauldron__svg {
+    filter: none;
+  }
+
+  .cauldron__liquid {
+    opacity: 0.15;
+  }
+
+  .cauldron__rune {
+    stroke: $color-line;
+    filter: none;
+
+    circle:last-child {
+      fill: $color-line;
+    }
+  }
+
+  .bubble {
+    display: none;
+  }
+}
+
+// Decorative bubbles: CSS animation only
+.bubble {
+  position: absolute;
+  top: 22%;
+  width: 10px;
+  height: 10px;
+  background: $color-glow;
+  border-radius: 50%;
+  box-shadow: $glow-neon;
+  opacity: 0;
+  animation: bubble-rise 2.6s ease-in infinite;
+}
+
+.bubble--1 {
+  left: 34%;
+}
+
+.bubble--2 {
+  left: 48%;
+  animation-delay: 0.7s;
+}
+
+.bubble--3 {
+  left: 60%;
+  animation-delay: 1.3s;
+}
+
+.bubble--4 {
+  left: 42%;
+  width: 6px;
+  height: 6px;
+  animation-delay: 1.9s;
+}
+
+@keyframes bubble-rise {
+  0% {
+    opacity: 0;
+    transform: translateY(10px) scale(0.6);
+  }
+
+  40% {
+    opacity: 0.9;
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateY(-60px) scale(1.2);
+  }
+}
+
+.cauldron__status {
+  padding: 6px 18px;
+  font-family: $font-display;
+  font-size: 0.8rem;
+  letter-spacing: 0.1em;
+  text-align: center;
+  text-transform: uppercase;
+  color: $color-emerald-light;
+  border: 1px solid rgb(16 185 129 / 40%);
+  border-radius: $radius-pill;
+}
+
+.cauldron--success .cauldron__status {
+  color: $color-glow;
+  border-color: $color-glow;
+}
+
+.cauldron--failure .cauldron__status {
+  color: $color-temp;
+  border-color: $color-danger;
+}
+
+.cauldron__contents {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+  min-height: 30px;
+  counter-reset: cauldron;
+}
+
+.cauldron__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px 3px 6px;
+  font-size: 0.85rem;
+  background: $color-card;
+  border: 1px solid $color-line;
+  border-radius: $radius-pill;
+  counter-increment: cauldron;
+
+  &::before {
+    content: counter(cauldron) '.';
+    font-size: 0.75rem;
+    color: $color-text-muted;
+  }
+}

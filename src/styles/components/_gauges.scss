@@ -1,0 +1,179 @@
+@use '../abstracts/variables' as *;
+@use '../abstracts/mixins' as *;
+
+.gauges {
+  grid-area: gauges;
+  display: grid;
+  gap: 14px;
+
+  @include desktop {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 20px;
+  }
+}
+
+.gauge {
+  --accent: #{$color-temp};
+
+  min-width: 0;
+}
+
+.gauge--density {
+  --accent: #{$color-density};
+}
+
+.gauge--magic {
+  --accent: #{$color-magic};
+}
+
+.gauge__head,
+.gauge__scale {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.gauge__label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: $font-display;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.gauge__current {
+  @include tabular-numbers;
+
+  font-size: 0.85rem;
+  color: $color-text-muted;
+}
+
+.gauge__value {
+  color: $color-emerald-light;
+}
+
+.gauge__track {
+  --zone-from: 0%;
+  --zone-to: 0%;
+  --tol-from: 0%;
+  --tol-to: 0%;
+  --fill-from: 0%;
+  --fill-to: 0%;
+  --marker: 0%;
+
+  position: relative;
+  height: 22px;
+  margin: 8px 0 4px;
+  background: $color-bg-deep;
+  border: 1px solid #2b3a30;
+  border-radius: $radius-md;
+  box-shadow: inset 0 2px 6px rgb(0 0 0 / 70%);
+}
+
+.gauge__tolerance,
+.gauge__zone,
+.gauge__fill {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: var(--from);
+  width: calc(var(--to) - var(--from));
+  transition:
+    left 0.4s ease,
+    width 0.4s ease;
+}
+
+// The checked range (recipe ± tolerance), faint
+.gauge__tolerance {
+  --from: var(--tol-from);
+  --to: var(--tol-to);
+
+  background: rgb(16 185 129 / 10%);
+}
+
+// The recipe target zone
+.gauge__zone {
+  --from: var(--zone-from);
+  --to: var(--zone-to);
+
+  background: rgb(16 185 129 / 30%);
+  border-inline: 2px solid $color-emerald-light;
+  transition:
+    left 0.4s ease,
+    width 0.4s ease,
+    box-shadow 0.3s ease;
+}
+
+.gauge__fill {
+  --from: var(--fill-from);
+  --to: var(--fill-to);
+
+  top: 7px;
+  bottom: 7px;
+  background: var(--accent);
+  border-radius: $radius-sm;
+  opacity: 0.85;
+}
+
+.gauge__zero {
+  position: absolute;
+  top: -3px;
+  bottom: -3px;
+  left: var(--zero);
+  width: 2px;
+  background: $color-text-muted;
+  opacity: 0.6;
+}
+
+.gauge__marker {
+  position: absolute;
+  top: -6px;
+  bottom: -6px;
+  left: var(--marker);
+  width: 10px;
+  margin-left: -5px;
+  background: $color-gold;
+  border: 1px solid #000;
+  border-radius: $radius-sm;
+  transition:
+    left 0.4s ease,
+    box-shadow 0.3s ease;
+}
+
+.gauge__scale {
+  @include tabular-numbers;
+
+  font-size: 0.75rem;
+  color: $color-text-muted;
+}
+
+.gauge__target {
+  color: $color-emerald-light;
+}
+
+.gauge--no-target {
+  .gauge__zone,
+  .gauge__tolerance {
+    visibility: hidden;
+  }
+}
+
+// US 1.2: green glow when the value is inside the recipe range
+.gauge--in-range {
+  .gauge__zone {
+    box-shadow: 0 0 14px rgb(0 255 136 / 70%);
+  }
+
+  .gauge__marker {
+    box-shadow: $glow-neon;
+  }
+
+  .gauge__value {
+    color: $color-glow;
+  }
+}

@@ -6,7 +6,7 @@ import type { RandomFn } from '../logic/random';
 import { pickRecipe } from '../logic/recipe-generator';
 import { createStock, getShelfIngredients, getStock, isShelfEmpty, takeFromStock } from '../logic/stock';
 import { applyTimeBonus, secondsToMs } from '../logic/timer';
-import type { Difficulty, GameOverReason, IDifficultySettings, IGameState } from '../types/game';
+import type { CauldronValues, Difficulty, GameOverReason, IDifficultySettings, IGameState } from '../types/game';
 
 /*
  * Pure state transitions: every function takes a state and returns a new one.
@@ -43,6 +43,11 @@ export function createNewGame(difficulty: Difficulty = DEFAULT_DIFFICULTY, rando
     activeRecipe: pickRecipe(difficulty, random),
     shelfStock: createStock(getShelfIngredients(settings.shelfSize), random),
   };
+}
+
+/** Current Temperature / Density / Magic Power of the cauldron. */
+export function getCauldronValues(state: IGameState): CauldronValues {
+  return calculateCauldron(state.cauldronIngredients);
 }
 
 export function isCauldronFull(state: IGameState): boolean {
@@ -96,7 +101,7 @@ export function brew(state: IGameState, random: RandomFn = Math.random): IGameSt
     return state;
   }
   const settings = getSettings(state);
-  const values = calculateCauldron(state.cauldronIngredients);
+  const values = getCauldronValues(state);
   const isSuccess = checkBrew(values, state.activeRecipe, settings.tolerance);
 
   const next: IGameState = isSuccess

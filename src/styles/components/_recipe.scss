@@ -1,0 +1,137 @@
+@use '../abstracts/variables' as *;
+@use '../abstracts/mixins' as *;
+
+.recipe {
+  grid-area: recipe;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 18px;
+  color: $color-ink;
+  text-align: center;
+  background: radial-gradient(circle at 50% 0%, #fbf6e8, transparent 70%), $color-parchment;
+  border: 3px solid $color-parchment-border;
+  border-radius: $radius-xl;
+  box-shadow:
+    inset 0 0 35px rgb(120 90 40 / 18%),
+    $shadow-panel;
+}
+
+.recipe__eyebrow {
+  font-family: $font-display;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #7a6446;
+}
+
+.recipe__name {
+  font-size: clamp(1.2rem, 5vw, 1.6rem);
+  letter-spacing: 0.06em;
+  color: $color-ink;
+}
+
+.recipe__flask {
+  width: 44px;
+  height: 44px;
+  color: #6b5232;
+
+  @media (width < 768px) {
+    display: none;
+  }
+}
+
+.recipe__counter-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  padding: 8px 12px;
+  background: $color-parchment-dark;
+  border: 2px solid $color-parchment-border;
+  border-radius: $radius-lg;
+  transition:
+    background-color 0.3s ease,
+    border-color 0.3s ease;
+}
+
+.recipe__counter {
+  @include tabular-numbers;
+
+  font-family: $font-display;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.recipe__dots {
+  display: inline-flex;
+  gap: 4px;
+}
+
+.recipe__dot {
+  width: 10px;
+  height: 10px;
+  border: 1.5px solid #7a6446;
+  border-radius: 50%;
+}
+
+.recipe__dot--filled {
+  background: $color-emerald;
+  border-color: #046b3c;
+}
+
+// US 1.3: highlight the counter at the maximum, so the blocked shelf makes sense
+.recipe--full .recipe__counter-box {
+  color: #7a1020;
+  background: #f6d5c8;
+  border-color: $color-danger;
+}
+
+.recipe__targets {
+  display: grid;
+  gap: 6px;
+  width: 100%;
+  margin: 0;
+}
+
+.recipe__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 10px;
+  background: rgb(255 255 255 / 45%);
+  border: 1px solid #dfcfac;
+  border-radius: $radius-md;
+
+  dt {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: $font-display;
+    font-size: 0.85rem;
+    font-weight: 700;
+  }
+}
+
+.recipe__range {
+  @include tabular-numbers;
+
+  margin: 0;
+  font-weight: 600;
+}
+
+.recipe__row--temp {
+  color: #9f1239;
+}
+
+.recipe__row--density {
+  color: #075985;
+}
+
+.recipe__row--magic {
+  color: #6b21a8;
+}
