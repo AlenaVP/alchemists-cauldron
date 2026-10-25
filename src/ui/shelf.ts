@@ -14,11 +14,32 @@ interface ICard {
   ingredient: IIngredient;
 }
 
-function createStatChip(label: string, value: number, modifier: string): HTMLElement {
-  return el('span', {
-    className: `chip chip--${modifier}`,
-    text: `${label} ${formatSigned(value)}`,
-  });
+/** Level 3: the numbers live in a tooltip, the card shows only icon, name and stock. */
+function createTooltip(ingredient: IIngredient): HTMLElement {
+  const row = (label: string, value: number, modifier: string): HTMLElement =>
+    el('span', { className: `tooltip__row tooltip__row--${modifier}` }, [
+      el('span', { text: label }),
+      el('b', { text: formatSigned(value) }),
+    ]);
+  return el('span', { className: 'tooltip', attrs: { id: `tooltip-${ingredient.id}`, role: 'tooltip' } }, [
+    el('span', { className: 'tooltip__title', text: ingredient.name }),
+    row('Temperature', ingredient.temperature, 'temp'),
+    row('Density', ingredient.density, 'density'),
+    row('Magic Power', ingredient.magicPower, 'magic'),
+  ]);
+}
+
+const TOOLTIP_WIDTH = 230;
+const TOOLTIP_HEIGHT = 150;
+
+/** Opens the tooltip to the left / upward near the screen edges (US 3.2). */
+function placeTooltip(button: HTMLElement): void {
+  const rect = button.getBoundingClientRect();
+  const roomRight = window.innerWidth - rect.right;
+  const fitsSide = roomRight >= TOOLTIP_WIDTH || rect.left >= TOOLTIP_WIDTH;
+  button.classList.toggle('ingredient--tip-below', !fitsSide);
+  button.classList.toggle('ingredient--tip-left', fitsSide && roomRight < TOOLTIP_WIDTH);
+  button.classList.toggle('ingredient--tip-up', window.innerHeight - rect.top < TOOLTIP_HEIGHT + rect.height);
 }
 
 function createCard(ingredient: IIngredient): { slot: HTMLLIElement; card: ICard } {
@@ -26,15 +47,18 @@ function createCard(ingredient: IIngredient): { slot: HTMLLIElement; card: ICard
   const button = el('button', { className: 'ingredient', attrs: { type: 'button', 'data-id': ingredient.id } }, [
     createIcon(ingredient.icon, 'ingredient__icon'),
     el('span', { className: 'ingredient__name', text: ingredient.name }),
-    el('span', { className: 'ingredient__stats' }, [
-      createStatChip('T', ingredient.temperature, 'temp'),
-      createStatChip('D', ingredient.density, 'density'),
-      createStatChip('MP', ingredient.magicPower, 'magic'),
-    ]),
     stock,
+    createTooltip(ingredient),
   ]);
+  button.setAttribute('aria-describedby', `tooltip-${ingredient.id}`);
   button.addEventListener('click', () => {
     addToCauldron(ingredient.id);
+  });
+  button.addEventListener('mouseenter', () => {
+    placeTooltip(button);
+  });
+  button.addEventListener('focus', () => {
+    placeTooltip(button);
   });
   // US 3.1: HTML5 drag & drop; the cauldron reads the id from dataTransfer
   button.addEventListener('dragstart', (event) => {
