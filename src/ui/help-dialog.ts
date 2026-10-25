@@ -42,7 +42,7 @@ export function createHelpDialog(): void {
     reactions,
     el('p', {
       className: 'dialog__text',
-      text: 'Pause any time with the pause button next to the timer.',
+      text: 'Keyboard: 1–8 add an ingredient, B brew, O pour out, P or Esc pause. On the pause screen press Enter to resume. You can also drag cards into the cauldron.',
     }),
     done,
   );

@@ -42,12 +42,17 @@ function placeTooltip(button: HTMLElement): void {
   button.classList.toggle('ingredient--tip-up', window.innerHeight - rect.top < TOOLTIP_HEIGHT + rect.height);
 }
 
-function createCard(ingredient: IIngredient): { slot: HTMLLIElement; card: ICard } {
+function createCard(ingredient: IIngredient, index: number): { slot: HTMLLIElement; card: ICard } {
   const stock = el('span', { className: 'ingredient__stock' });
   const button = el('button', { className: 'ingredient', attrs: { type: 'button', 'data-id': ingredient.id } }, [
     createIcon(ingredient.icon, 'ingredient__icon'),
     el('span', { className: 'ingredient__name', text: ingredient.name }),
     stock,
+    el('kbd', {
+      className: 'kbd ingredient__key',
+      text: String(index + 1),
+      attrs: { 'aria-hidden': 'true' },
+    }),
     createTooltip(ingredient),
   ]);
   button.setAttribute('aria-describedby', `tooltip-${ingredient.id}`);
@@ -60,7 +65,6 @@ function createCard(ingredient: IIngredient): { slot: HTMLLIElement; card: ICard
   button.addEventListener('focus', () => {
     placeTooltip(button);
   });
-  // US 3.1: HTML5 drag & drop; the cauldron reads the id from dataTransfer
   button.addEventListener('dragstart', (event) => {
     event.dataTransfer?.setData(DRAG_TYPE, ingredient.id);
     if (event.dataTransfer) event.dataTransfer.effectAllowed = 'copy';
@@ -101,8 +105,8 @@ export function createShelf(): IComponent {
       grid.replaceChildren(...placeholders);
       return;
     }
-    const slots = getShelfIngredients(shelfSize).map((ingredient) => {
-      const { slot, card } = createCard(ingredient);
+    const slots = getShelfIngredients(shelfSize).map((ingredient, index) => {
+      const { slot, card } = createCard(ingredient, index);
       cards.push(card);
       return slot;
     });
