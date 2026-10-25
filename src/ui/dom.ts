@@ -46,18 +46,18 @@ export interface IComponent {
 }
 
 /**
- * Restarts a CSS animation class. The class is removed when the animation ends.
+ * Restarts a CSS animation class. The class is removed when the named CSS
+ * animation ends (it may run on a child or a pseudo-element).
  * Timing lives in CSS: no setTimeout or setInterval for visual effects.
  */
-export function playAnimation(element: HTMLElement, className: string): void {
+export function playAnimation(element: HTMLElement, className: string, animationName: string): void {
   element.classList.remove(className);
-  element.getBoundingClientRect(); // reflow, so the same animation can start again
+  element.getBoundingClientRect();
   element.classList.add(className);
-  element.addEventListener(
-    'animationend',
-    (event) => {
-      if (event.target === element) element.classList.remove(className);
-    },
-    { once: true },
-  );
+  const onEnd = (event: AnimationEvent): void => {
+    if (event.animationName !== animationName) return;
+    element.classList.remove(className);
+    element.removeEventListener('animationend', onEnd);
+  };
+  element.addEventListener('animationend', onEnd);
 }
