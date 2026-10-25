@@ -63,6 +63,10 @@ export interface IGameState {
   shelfStock: Record<string, number>;
   lastBrew: BrewResult | null;
   gameOverReason: GameOverReason | null;
+  /** Level 3: the reaction that fired on the last add, if any */
+  lastReactionId: string | null;
+  /** Grows on every brew or fired reaction, so the UI can replay an animation */
+  eventId: number;
 }
 
 export interface ILeaderboardEntry {
