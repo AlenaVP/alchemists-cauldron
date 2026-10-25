@@ -1,5 +1,6 @@
+import { REACTIONS } from '../data/reactions';
 import type { IGameState } from '../types/game';
-import { el, setText, type IComponent } from './dom';
+import { el, playAnimation, setText, type IComponent } from './dom';
 import { createIcon } from './icons';
 
 /* Static, trusted SVG markup of the cauldron itself. */
@@ -35,6 +36,12 @@ function getStatusMessage(state: IGameState): string {
     case 'playing':
       break;
   }
+  const reaction = REACTIONS.find((item) => item.id === state.lastReactionId);
+  if (reaction) {
+    // "Fairy Dust + Caustic Acid: Magic Power +50%" -> "Bubbling! Magic Power +50%"
+    const effect = reaction.description.split(': ').at(-1) ?? '';
+    return `Reaction — ${reaction.name}! ${effect}`;
+  }
   if (state.lastBrew === 'success') return 'Potion brewed! A new recipe has arrived';
   if (state.lastBrew === 'failure') return 'Wrong mixture! You lost a life';
   if (state.cauldronIngredients.length === 0) return 'Add ingredients from the shelf';
@@ -59,6 +66,7 @@ export function createCauldron(): IComponent {
   ]);
 
   let renderedContents = '';
+  let renderedEvent = 0;
 
   function update(state: IGameState): void {
     const isActive = state.status !== 'menu';
@@ -66,6 +74,11 @@ export function createCauldron(): IComponent {
     element.classList.toggle('cauldron--success', state.lastBrew === 'success');
     element.classList.toggle('cauldron--failure', state.lastBrew === 'failure');
     setText(status, getStatusMessage(state));
+
+    if (state.eventId !== renderedEvent) {
+      renderedEvent = state.eventId;
+      if (state.lastReactionId) playAnimation(element, 'fx-reaction');
+    }
 
     const contentsKey = state.cauldronIngredients.map((ingredient) => ingredient.id).join(',');
     if (contentsKey !== renderedContents) {

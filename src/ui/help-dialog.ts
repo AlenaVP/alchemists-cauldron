@@ -1,8 +1,9 @@
+import { getReactions } from '../logic/reactions';
 import { getSettings } from '../state/game-state';
 import type { IGameState } from '../types/game';
 import { createDialog } from './dialog';
 import { closeDialog, registerDialog } from './dialog-manager';
-import { el } from './dom';
+import { el, setText } from './dom';
 
 /** Rules use the numbers of the current difficulty, so they always match the game. */
 function getRules(state: IGameState): string[] {
@@ -24,6 +25,8 @@ export function createHelpDialog(): void {
     className: 'dialog--wide',
   });
   const list = el('ol', { className: 'rules' });
+  const reactionsTitle = el('h3', { className: 'dialog__label' });
+  const reactions = el('ul', { className: 'reactions' });
   const done = el('button', {
     className: 'button button--primary',
     text: 'Got it',
@@ -35,6 +38,8 @@ export function createHelpDialog(): void {
 
   dialog.body.append(
     list,
+    reactionsTitle,
+    reactions,
     el('p', {
       className: 'dialog__text',
       text: 'Pause any time with the pause button next to the timer.',
@@ -46,6 +51,14 @@ export function createHelpDialog(): void {
     dialog,
     update: (state) => {
       list.replaceChildren(...getRules(state).map((rule) => el('li', { className: 'rules__item', text: rule })));
+      const active = getReactions(state.difficulty);
+      const label = getSettings(state).label;
+      setText(reactionsTitle, active.length ? `Reactions on ${label}` : `No reactions on ${label}`);
+      reactions.replaceChildren(
+        ...active.map((reaction) =>
+          el('li', { className: 'reactions__item' }, [el('b', { text: reaction.name }), ` — ${reaction.description}`]),
+        ),
+      );
     },
   });
 }

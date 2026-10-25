@@ -228,3 +228,15 @@
   font-size: 0.8rem;
   color: $color-text-muted;
 }
+
+.reactions {
+  display: grid;
+  gap: 6px;
+  width: 100%;
+  font-size: 0.95rem;
+  text-align: left;
+}
+
+.reactions__item b {
+  color: $color-magic;
+}
