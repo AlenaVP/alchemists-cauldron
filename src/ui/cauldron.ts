@@ -1,7 +1,11 @@
 import { REACTIONS } from '../data/reactions';
+import { addToCauldron } from '../state/game-controller';
+import { isCauldronFull } from '../state/game-state';
+import { getState } from '../state/store';
 import type { IGameState } from '../types/game';
 import { el, playAnimation, setText, type IComponent } from './dom';
 import { createIcon } from './icons';
+import { DRAG_TYPE } from './shelf';
 
 /* Static, trusted SVG markup of the cauldron itself. */
 const CAULDRON_SVG = `
@@ -38,7 +42,6 @@ function getStatusMessage(state: IGameState): string {
   }
   const reaction = REACTIONS.find((item) => item.id === state.lastReactionId);
   if (reaction) {
-    // "Fairy Dust + Caustic Acid: Magic Power +50%" -> "Bubbling! Magic Power +50%"
     const effect = reaction.description.split(': ').at(-1) ?? '';
     return `Reaction — ${reaction.name}! ${effect}`;
   }
@@ -64,6 +67,28 @@ export function createCauldron(): IComponent {
     status,
     contents,
   ]);
+
+  // US 3.1: the cauldron is a drop zone while the game runs and has space
+  const canDrop = (): boolean => getState().status === 'playing' && !isCauldronFull(getState());
+
+  element.addEventListener('dragover', (event) => {
+    if (!canDrop() || !event.dataTransfer?.types.includes(DRAG_TYPE)) return;
+    event.preventDefault();
+    event.dataTransfer.dropEffect = 'copy';
+    element.classList.add('cauldron--drop');
+  });
+  element.addEventListener('dragleave', (event) => {
+    if (!(event.relatedTarget instanceof Node && element.contains(event.relatedTarget))) {
+      element.classList.remove('cauldron--drop');
+    }
+  });
+  element.addEventListener('drop', (event) => {
+    event.preventDefault();
+    element.classList.remove('cauldron--drop');
+    const id = event.dataTransfer?.getData(DRAG_TYPE);
+    // The same action as a click: paused, full or empty-stock drops are ignored there
+    if (id && canDrop()) addToCauldron(id);
+  });
 
   let renderedContents = '';
   let renderedEvent = 0;

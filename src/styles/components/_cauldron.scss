@@ -158,7 +158,6 @@
   }
 }
 
-// Level 3: a reaction fired
 .fx-reaction .cauldron__visual {
   animation: reaction-flash 0.9s ease-out;
 }
@@ -178,4 +177,12 @@
     filter: none;
     transform: scale(1);
   }
+}
+
+// US 3.1: highlighted drop zone
+.cauldron--drop {
+  border-color: $color-glow;
+  box-shadow:
+    0 0 0 2px $color-glow,
+    0 0 30px rgb(0 255 136 / 45%);
 }

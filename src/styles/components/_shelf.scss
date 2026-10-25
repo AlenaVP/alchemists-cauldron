@@ -51,6 +51,10 @@
     border-color: $color-emerald-light;
   }
 
+  &[draggable='true'] {
+    cursor: grab;
+  }
+
   &:active:not(:disabled) {
     transform: scale(0.97);
   }
@@ -150,7 +154,6 @@
   box-shadow: 0 2px 6px rgb(0 0 0 / 60%);
 }
 
-// Stock 0: no icon, dimmed, badge 0, the slot stays in place
 .ingredient--empty {
   opacity: 0.35;
 
@@ -168,7 +171,6 @@
   opacity: 0.6;
 }
 
-// Ingredient colours
 .icon--drop {
   color: #38bdf8;
 }
