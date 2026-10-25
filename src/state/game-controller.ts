@@ -1,5 +1,6 @@
 import { getTimeLeft } from '../logic/timer';
-import type { Difficulty } from '../types/game';
+import { clearSave, loadGame, saveGame } from '../storage/save';
+import type { Difficulty, IGameState } from '../types/game';
 import { addIngredient, brew, createMenuState, createNewGame, pauseGame, resumeGame, setTimeLeft } from './game-state';
 import { getState, setState } from './store';
 
@@ -11,6 +12,12 @@ import { getState, setState } from './store';
 /** Timestamp when the time runs out. Exists only while the game is running. */
 let endTime: number | null = null;
 let frameId: number | null = null;
+
+/** US 2.2: every action that matters goes through here, so it is saved at once. */
+function commit(next: IGameState): void {
+  setState(next);
+  saveGame(next);
+}
 
 function stopTimer(): void {
   if (frameId !== null) {
@@ -24,11 +31,13 @@ function tick(): void {
   if (endTime === null) {
     return;
   }
+  // The timer is not saved every frame: pause and page hide save the exact time
   setState(setTimeLeft(getState(), getTimeLeft(endTime, Date.now())));
   if (getState().status === 'playing') {
     frameId = requestAnimationFrame(tick);
   } else {
     stopTimer();
+    clearSave();
   }
 }
 
@@ -46,16 +55,17 @@ function syncEndTime(): void {
 }
 
 export function startNewGame(difficulty?: Difficulty): void {
-  setState(createNewGame(difficulty ?? getState().difficulty));
+  // A new game overwrites the old unfinished save
+  commit(createNewGame(difficulty ?? getState().difficulty));
   startTimer();
 }
 
 export function addToCauldron(id: string): void {
-  setState(addIngredient(getState(), id));
+  commit(addIngredient(getState(), id));
 }
 
 export function brewPotion(): void {
-  setState(brew(getState()));
+  commit(brew(getState()));
   if (getState().status === 'playing') {
     syncEndTime();
   } else {
@@ -68,20 +78,41 @@ export function pause(): void {
     return;
   }
   stopTimer();
-  setState(pauseGame(getState()));
+  commit(pauseGame(getState()));
 }
 
 export function resume(): void {
   if (getState().status !== 'paused') {
     return;
   }
-  setState(resumeGame(getState()));
+  commit(resumeGame(getState()));
   startTimer();
+}
+
+/** US 2.1: the difficulty can be changed only on the start screen. */
+export function selectDifficulty(difficulty: Difficulty): void {
+  if (getState().status === 'menu') {
+    setState(createMenuState(difficulty));
+  }
 }
 
 export function exitToMenu(): void {
   stopTimer();
+  clearSave();
   setState(createMenuState(getState().difficulty));
+}
+
+export function hasSavedGame(): boolean {
+  return loadGame() !== null;
+}
+
+/** US 2.2: restore the saved game in paused state; the saved stock is not re-rolled. */
+export function continueGame(): boolean {
+  const saved = loadGame();
+  if (!saved) return false;
+  stopTimer();
+  setState(saved);
+  return true;
 }
 
 /** US 1.5: pause automatically when the tab becomes hidden. */
@@ -89,6 +120,17 @@ export function initAutoPause(): void {
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'hidden') {
       pause();
+    }
+  });
+  // Reload or close: keep the exact time left of a running game
+  window.addEventListener('pagehide', () => {
+    if (endTime !== null) {
+      setState(setTimeLeft(getState(), getTimeLeft(endTime, Date.now())));
+    }
+    // Only a running game is saved here: the start screen must keep an older save
+    const { status } = getState();
+    if (status === 'playing' || status === 'paused') {
+      saveGame(getState());
     }
   });
 }

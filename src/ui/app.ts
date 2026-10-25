@@ -1,9 +1,10 @@
+import { hasSavedGame } from '../state/game-controller';
 import { getState, subscribe } from '../state/store';
 import type { IGameState } from '../types/game';
 import { createBars } from './bars';
 import { createCauldron } from './cauldron';
 import { createControls } from './controls';
-import { syncDialogs } from './dialog-manager';
+import { openDialog, syncDialogs } from './dialog-manager';
 import { el, type IComponent } from './dom';
 import { createGameOverDialog } from './game-over-dialog';
 import { createHelpDialog } from './help-dialog';
@@ -44,4 +45,9 @@ export function mountApp(root: HTMLElement): void {
 
   subscribe(render);
   render(getState());
+
+  // US 2.2: an unfinished game was found, offer Continue Game right away
+  if (hasSavedGame()) {
+    openDialog('menu');
+  }
 }

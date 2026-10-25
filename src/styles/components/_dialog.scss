@@ -170,3 +170,61 @@
     border-radius: $radius-sm;
   }
 }
+
+.difficulty {
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  border: none;
+
+  .dialog__label {
+    margin: 0 auto 10px;
+  }
+}
+
+.difficulty__options {
+  display: grid;
+  gap: 8px;
+
+  @include tablet {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.difficulty__option {
+  @include focus-ring;
+
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px;
+  color: $color-gold-muted;
+  background: $color-card-end;
+  border: 1px solid $color-gold-border;
+  border-radius: $radius-lg;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+
+  &:hover {
+    border-color: $color-gold;
+  }
+
+  &[aria-pressed='true'] {
+    color: $color-glow;
+    border: 2px solid $color-glow;
+    box-shadow: $glow-neon;
+  }
+}
+
+.difficulty__name {
+  font-family: $font-display;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.difficulty__details {
+  font-size: 0.8rem;
+  color: $color-text-muted;
+}

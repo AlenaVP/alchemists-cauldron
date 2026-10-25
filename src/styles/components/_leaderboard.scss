@@ -93,3 +93,33 @@
   font-size: 0.9rem;
   color: $color-temp;
 }
+
+.leaderboard__tabs {
+  display: flex;
+  gap: 6px;
+}
+
+.leaderboard__tab {
+  @include focus-ring;
+
+  min-height: 40px;
+  padding: 6px 16px;
+  font-family: $font-display;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: $color-gold-muted;
+  background: $color-card-end;
+  border: 1px solid $color-gold-border;
+  border-radius: $radius-pill;
+
+  &[aria-pressed='true'] {
+    color: $color-glow;
+    border-color: $color-glow;
+  }
+}
+
+.leaderboard__difficulty {
+  font-size: 0.85rem;
+}
