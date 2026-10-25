@@ -30,7 +30,8 @@
   font-family: $font-display;
   font-size: clamp(1.1rem, 4vw, 1.6rem);
   font-weight: 900;
-  letter-spacing: 0.3em;
+  letter-spacing: 0.12em;
+  white-space: nowrap;
   text-transform: uppercase;
   color: $color-glow;
   background: linear-gradient(180deg, #0f3324, #082016);
@@ -48,6 +49,10 @@
   &:disabled {
     opacity: 0.4;
     box-shadow: none;
+  }
+
+  @include tablet {
+    letter-spacing: 0.3em;
   }
 }
 

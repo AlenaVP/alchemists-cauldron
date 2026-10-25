@@ -27,11 +27,11 @@ export function createControls(): IComponent {
 
   const help = createRoundButton('book', 'Help', 'controls__help');
   help.addEventListener('click', () => {
-    pause(); // reading the rules must not cost time
+    pause();
     openDialog('help');
   });
 
-  const menu = createRoundButton('gear', 'Menu', 'controls__menu');
+  const menu = createRoundButton('gear', 'Settings', 'controls__menu');
   menu.addEventListener('click', () => {
     openDialog('menu');
   });
@@ -43,7 +43,6 @@ export function createControls(): IComponent {
     setText(mainLabel, mode === 'start' ? 'Start Game' : 'Brew');
     mainButton.classList.toggle('main-action--start', mode === 'start');
     mainButton.disabled = mode === 'brew' && !canBrew(state);
-    // The menu (and later the difficulty) is not available during a run
     menu.disabled = state.status === 'playing' || state.status === 'paused';
   }
 
