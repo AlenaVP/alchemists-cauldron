@@ -1,7 +1,16 @@
 import { getTimeLeft } from '../logic/timer';
 import { clearSave, loadGame, saveGame } from '../storage/save';
 import type { Difficulty, IGameState } from '../types/game';
-import { addIngredient, brew, createMenuState, createNewGame, pauseGame, resumeGame, setTimeLeft } from './game-state';
+import {
+  addIngredient,
+  brew,
+  createMenuState,
+  createNewGame,
+  pauseGame,
+  pourOut,
+  resumeGame,
+  setTimeLeft,
+} from './game-state';
 import { getState, setState } from './store';
 
 /*
@@ -60,7 +69,6 @@ export function startNewGame(difficulty?: Difficulty): void {
 
 export function addToCauldron(id: string): void {
   commit(addIngredient(getState(), id));
-  // A reaction can take time or end the game
   if (getState().status === 'playing') {
     syncEndTime();
   } else {
@@ -70,6 +78,15 @@ export function addToCauldron(id: string): void {
 
 export function brewPotion(): void {
   commit(brew(getState()));
+  if (getState().status === 'playing') {
+    syncEndTime();
+  } else {
+    stopTimer();
+  }
+}
+
+export function pourOutCauldron(): void {
+  commit(pourOut(getState()));
   if (getState().status === 'playing') {
     syncEndTime();
   } else {

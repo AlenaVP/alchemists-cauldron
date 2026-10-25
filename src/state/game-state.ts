@@ -1,4 +1,4 @@
-import { DEFAULT_DIFFICULTY, DIFFICULTY_SETTINGS, TIME_BONUS_CAP } from '../data/difficulty';
+import { DEFAULT_DIFFICULTY, DIFFICULTY_SETTINGS, POUR_OUT_PENALTY, TIME_BONUS_CAP } from '../data/difficulty';
 import { findIngredient } from '../data/ingredients';
 import { checkBrew } from '../logic/brew-check';
 import type { RandomFn } from '../logic/random';
@@ -75,7 +75,6 @@ export function addIngredient(state: IGameState, id: string): IGameState {
     lastReactionId: null,
   };
 
-  // US 3.3: one-time effects only when a reaction changes from not active to active
   for (const reaction of getFiredReactions(before, after, getReactions(state.difficulty))) {
     const { timePenalty = 0, lifePenalty = 0, clearCauldron = false } = reaction.effects ?? {};
     next = {
@@ -144,6 +143,20 @@ export function brew(state: IGameState, random: RandomFn = Math.random): IGameSt
       };
 
   return checkGameOver(next);
+}
+
+/** US 3.4: clears the cauldron for 10 s, no life lost, ingredients are not returned. */
+export function pourOut(state: IGameState): IGameState {
+  if (!canBrew(state)) {
+    return state;
+  }
+  return checkGameOver({
+    ...state,
+    cauldronIngredients: [],
+    timeLeft: Math.max(0, state.timeLeft - secondsToMs(POUR_OUT_PENALTY)),
+    lastBrew: null,
+    lastReactionId: null,
+  });
 }
 
 export function setTimeLeft(state: IGameState, timeLeft: number): IGameState {
