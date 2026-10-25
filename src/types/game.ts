@@ -72,3 +72,21 @@ export interface ILeaderboardEntry {
   date: number;
   difficulty: Difficulty;
 }
+
+/** One-time side effects of a reaction, applied only when it fires. */
+export interface IReactionEffects {
+  /** Seconds */
+  timePenalty?: number;
+  lifePenalty?: number;
+  clearCauldron?: boolean;
+}
+
+export interface IReaction {
+  id: string;
+  name: string;
+  /** Short text for the player */
+  description: string;
+  isActive: (ingredients: readonly IIngredient[]) => boolean;
+  apply: (values: CauldronValues) => CauldronValues;
+  effects?: IReactionEffects;
+}
