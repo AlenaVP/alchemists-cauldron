@@ -46,5 +46,8 @@ export const TIME_BONUS_CAP = 150;
 /** US 1.4: below this many seconds the timer turns red. */
 export const LOW_TIME_THRESHOLD = 15;
 
+/** US 3.4: Pour Out costs this many seconds. */
+export const POUR_OUT_PENALTY = 10;
+
 export const STOCK_MIN = 2;
 export const STOCK_MAX = 15;

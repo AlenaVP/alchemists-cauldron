@@ -8,6 +8,7 @@ import {
   createNewGame,
   getCauldronValues,
   pauseGame,
+  pourOut,
   resumeGame,
   setTimeLeft,
 } from './game-state';
@@ -154,5 +155,24 @@ describe('reactions (Level 3)', () => {
     };
     state = addIngredient(addIngredient(state, 'fairy-dust'), 'mandrake-root');
     expect(state.lastReactionId).toBeNull();
+  });
+});
+
+describe('pourOut (Level 3)', () => {
+  it('clears the cauldron for 10 s and keeps lives, score and stock', () => {
+    let state = playing({ timeLeft: 60_000, shelfStock: { 'frost-lotus': 3 } });
+    state = pourOut(addIngredient(state, 'frost-lotus'));
+    expect(state).toMatchObject({
+      timeLeft: 50_000,
+      lives: 3,
+      score: 0,
+      shelfStock: { 'frost-lotus': 2 },
+    });
+    expect(state.cauldronIngredients).toEqual([]);
+  });
+
+  it('does nothing with an empty cauldron', () => {
+    const state = playing();
+    expect(pourOut(state)).toBe(state);
   });
 });

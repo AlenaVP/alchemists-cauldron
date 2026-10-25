@@ -1,4 +1,4 @@
-import { brewPotion, pause, startNewGame } from '../state/game-controller';
+import { brewPotion, pause, pourOutCauldron, startNewGame } from '../state/game-controller';
 import { canBrew } from '../state/game-state';
 import type { IGameState } from '../types/game';
 import { openDialog } from './dialog-manager';
@@ -25,6 +25,15 @@ export function createControls(): IComponent {
     }
   });
 
+  const pourOut = el('button', {
+    className: 'pour-out',
+    text: 'Pour Out',
+    attrs: { type: 'button', title: 'Clear the cauldron for 10 seconds' },
+  });
+  pourOut.addEventListener('click', () => {
+    pourOutCauldron();
+  });
+
   const help = createRoundButton('book', 'Help', 'controls__help');
   help.addEventListener('click', () => {
     pause();
@@ -36,13 +45,20 @@ export function createControls(): IComponent {
     openDialog('menu');
   });
 
-  const element = el('footer', { className: 'controls' }, [help, mainButton, menu]);
+  const element = el('footer', { className: 'controls' }, [
+    help,
+    el('div', { className: 'controls__center' }, [mainButton, pourOut]),
+    menu,
+  ]);
 
   function update(state: IGameState): void {
     mode = state.status === 'menu' || state.status === 'game-over' ? 'start' : 'brew';
     setText(mainLabel, mode === 'start' ? 'Start Game' : 'Brew');
     mainButton.classList.toggle('main-action--start', mode === 'start');
     mainButton.disabled = mode === 'brew' && !canBrew(state);
+    pourOut.hidden = mode !== 'brew';
+    pourOut.disabled = !canBrew(state);
+    // The menu (and later the difficulty) is not available during a run
     menu.disabled = state.status === 'playing' || state.status === 'paused';
   }
 
