@@ -1,5 +1,5 @@
 import { DIFFICULTY_SETTINGS } from '../data/difficulty';
-import { selectDifficulty, startNewGame } from '../state/game-controller';
+import { continueGame, hasSavedGame, selectDifficulty, startNewGame } from '../state/game-controller';
 import { getState } from '../state/store';
 import type { Difficulty, IDifficultySettings, IGameState } from '../types/game';
 import { createDialog } from './dialog';
@@ -37,6 +37,16 @@ export function createMenuDialog(): void {
     return button;
   });
 
+  const continueButton = el('button', {
+    className: 'button button--primary',
+    text: 'Continue Game',
+    attrs: { type: 'button' },
+  });
+  continueButton.addEventListener('click', () => {
+    closeAllDialogs();
+    continueGame();
+  });
+
   const newGame = el('button', {
     className: 'button button--primary',
     text: 'New Game',
@@ -60,12 +70,14 @@ export function createMenuDialog(): void {
       el('legend', { className: 'dialog__label', text: 'Select difficulty' }),
       el('div', { className: 'difficulty__options' }, difficultyButtons),
     ]),
-    el('div', { className: 'dialog__actions dialog__actions--column' }, [newGame, leaderboard]),
+    el('div', { className: 'dialog__actions dialog__actions--column' }, [continueButton, newGame, leaderboard]),
   );
 
   registerDialog('menu', {
     dialog,
     update: (state: IGameState) => {
+      // Only a valid unfinished save is offered
+      continueButton.hidden = !hasSavedGame();
       difficultyButtons.forEach((button) => {
         button.setAttribute('aria-pressed', String(button.dataset.difficulty === state.difficulty));
       });

@@ -38,6 +38,10 @@
   }
 }
 
+.button[hidden] {
+  display: none;
+}
+
 .button--primary {
   color: $color-glow;
   background: linear-gradient(180deg, #0f3324, #082016);
