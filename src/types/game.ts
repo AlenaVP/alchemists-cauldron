@@ -63,6 +63,10 @@ export interface IGameState {
   shelfStock: Record<string, number>;
   lastBrew: BrewResult | null;
   gameOverReason: GameOverReason | null;
+  /** Level 3: the reaction that fired on the last add, if any */
+  lastReactionId: string | null;
+  /** Grows on every brew or fired reaction, so the UI can replay an animation */
+  eventId: number;
 }
 
 export interface ILeaderboardEntry {
@@ -71,4 +75,22 @@ export interface ILeaderboardEntry {
   /** Timestamp of the result */
   date: number;
   difficulty: Difficulty;
+}
+
+/** One-time side effects of a reaction, applied only when it fires. */
+export interface IReactionEffects {
+  /** Seconds */
+  timePenalty?: number;
+  lifePenalty?: number;
+  clearCauldron?: boolean;
+}
+
+export interface IReaction {
+  id: string;
+  name: string;
+  /** Short text for the player */
+  description: string;
+  isActive: (ingredients: readonly IIngredient[]) => boolean;
+  apply: (values: CauldronValues) => CauldronValues;
+  effects?: IReactionEffects;
 }

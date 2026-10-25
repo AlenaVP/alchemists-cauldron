@@ -100,5 +100,7 @@ export function parseSavedGame(data: unknown): IGameState | null {
     shelfStock,
     lastBrew: null,
     gameOverReason: null,
+    lastReactionId: null,
+    eventId: 0,
   };
 }
