@@ -6,6 +6,8 @@ import type { IGameState, IIngredient } from '../types/game';
 import { el, setText, type IComponent } from './dom';
 import { createIcon } from './icons';
 
+export const DRAG_TYPE = 'text/plain';
+
 interface ICard {
   button: HTMLButtonElement;
   stock: HTMLElement;
@@ -34,6 +36,11 @@ function createCard(ingredient: IIngredient): { slot: HTMLLIElement; card: ICard
   button.addEventListener('click', () => {
     addToCauldron(ingredient.id);
   });
+  // US 3.1: HTML5 drag & drop; the cauldron reads the id from dataTransfer
+  button.addEventListener('dragstart', (event) => {
+    event.dataTransfer?.setData(DRAG_TYPE, ingredient.id);
+    if (event.dataTransfer) event.dataTransfer.effectAllowed = 'copy';
+  });
   return {
     slot: el('li', { className: 'shelf__slot' }, [button]),
     card: { button, stock, ingredient },
@@ -61,7 +68,6 @@ export function createShelf(): IComponent {
     const { shelfSize } = getSettings(state);
     cards.length = 0;
     if (state.status === 'menu') {
-      // Start screen: the shelf is empty, only the slots are visible
       const placeholders = Array.from({ length: shelfSize }, () =>
         el('li', {
           className: 'shelf__slot shelf__slot--placeholder',
@@ -92,6 +98,7 @@ export function createShelf(): IComponent {
       const portions = getStock(state.shelfStock, ingredient.id);
       const isEmpty = portions <= 0;
       button.disabled = state.status !== 'playing' || isFull || isEmpty;
+      button.draggable = !button.disabled;
       button.classList.toggle('ingredient--empty', isEmpty);
       setText(stock, String(portions));
       button.setAttribute('aria-label', `${ingredient.name}, ${String(portions)} left`);
