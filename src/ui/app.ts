@@ -5,7 +5,7 @@ import { createBars } from './bars';
 import { createCauldron } from './cauldron';
 import { createControls } from './controls';
 import { openDialog, syncDialogs } from './dialog-manager';
-import { el, type IComponent } from './dom';
+import { el, playAnimation, type IComponent } from './dom';
 import { createGameOverDialog } from './game-over-dialog';
 import { createHelpDialog } from './help-dialog';
 import { createHud } from './hud';
@@ -35,7 +35,13 @@ export function mountApp(root: HTMLElement): void {
   createHelpDialog();
 
   const components: IComponent[] = [hud, shelf, cauldron, recipe, bars, controls];
+  let shownEvent = 0;
   const render = (state: IGameState): void => {
+    // US 3.5: a short screen shake after a failed brew
+    if (state.eventId !== shownEvent) {
+      shownEvent = state.eventId;
+      if (state.lastBrew === 'failure') playAnimation(board, 'fx-shake', 'shake');
+    }
     components.forEach((component) => {
       component.update(state);
     });
@@ -46,7 +52,6 @@ export function mountApp(root: HTMLElement): void {
   subscribe(render);
   render(getState());
 
-  // US 2.2: an unfinished game was found, offer Continue Game right away
   if (hasSavedGame()) {
     openDialog('menu');
   }

@@ -1,8 +1,8 @@
-import { DEFAULT_DIFFICULTY, DIFFICULTY_SETTINGS, TIME_BONUS_CAP } from '../data/difficulty';
+import { DEFAULT_DIFFICULTY, DIFFICULTY_SETTINGS, POUR_OUT_PENALTY, TIME_BONUS_CAP } from '../data/difficulty';
 import { findIngredient } from '../data/ingredients';
 import { checkBrew } from '../logic/brew-check';
-import { calculateCauldron } from '../logic/calculate-cauldron';
 import type { RandomFn } from '../logic/random';
+import { applyReactions, getFiredReactions, getReactions } from '../logic/reactions';
 import { pickRecipe } from '../logic/recipe-generator';
 import { createStock, getShelfIngredients, getStock, isShelfEmpty, takeFromStock } from '../logic/stock';
 import { applyTimeBonus, secondsToMs } from '../logic/timer';
@@ -30,6 +30,8 @@ export function createMenuState(difficulty: Difficulty = DEFAULT_DIFFICULTY): IG
     shelfStock: {},
     lastBrew: null,
     gameOverReason: null,
+    lastReactionId: null,
+    eventId: 0,
   };
 }
 
@@ -45,9 +47,9 @@ export function createNewGame(difficulty: Difficulty = DEFAULT_DIFFICULTY, rando
   };
 }
 
-/** Current Temperature / Density / Magic Power of the cauldron. */
+/** Current Temperature / Density / Magic Power: sums plus the reactions of the difficulty. */
 export function getCauldronValues(state: IGameState): CauldronValues {
-  return calculateCauldron(state.cauldronIngredients);
+  return applyReactions(state.cauldronIngredients, getReactions(state.difficulty));
 }
 
 export function isCauldronFull(state: IGameState): boolean {
@@ -63,12 +65,28 @@ export function addIngredient(state: IGameState, id: string): IGameState {
   if (!ingredient || !canAddIngredient(state, id)) {
     return state;
   }
-  return {
+  const before = state.cauldronIngredients;
+  const after = [...before, ingredient];
+  let next: IGameState = {
     ...state,
-    cauldronIngredients: [...state.cauldronIngredients, ingredient],
+    cauldronIngredients: after,
     shelfStock: takeFromStock(state.shelfStock, id),
     lastBrew: null,
+    lastReactionId: null,
   };
+
+  for (const reaction of getFiredReactions(before, after, getReactions(state.difficulty))) {
+    const { timePenalty = 0, lifePenalty = 0, clearCauldron = false } = reaction.effects ?? {};
+    next = {
+      ...next,
+      timeLeft: Math.max(0, next.timeLeft - secondsToMs(timePenalty)),
+      lives: next.lives - lifePenalty,
+      cauldronIngredients: clearCauldron ? [] : next.cauldronIngredients,
+      lastReactionId: reaction.id,
+      eventId: state.eventId + 1,
+    };
+  }
+  return checkGameOver(next);
 }
 
 export function canBrew(state: IGameState): boolean {
@@ -112,15 +130,33 @@ export function brew(state: IGameState, random: RandomFn = Math.random): IGameSt
         activeRecipe: pickRecipe(state.difficulty, random),
         cauldronIngredients: [],
         lastBrew: 'success',
+        lastReactionId: null,
+        eventId: state.eventId + 1,
       }
     : {
         ...state,
         lives: state.lives - 1,
         cauldronIngredients: [],
         lastBrew: 'failure',
+        lastReactionId: null,
+        eventId: state.eventId + 1,
       };
 
   return checkGameOver(next);
+}
+
+/** US 3.4: clears the cauldron for 10 s, no life lost, ingredients are not returned. */
+export function pourOut(state: IGameState): IGameState {
+  if (!canBrew(state)) {
+    return state;
+  }
+  return checkGameOver({
+    ...state,
+    cauldronIngredients: [],
+    timeLeft: Math.max(0, state.timeLeft - secondsToMs(POUR_OUT_PENALTY)),
+    lastBrew: null,
+    lastReactionId: null,
+  });
 }
 
 export function setTimeLeft(state: IGameState, timeLeft: number): IGameState {

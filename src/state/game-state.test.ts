@@ -1,7 +1,17 @@
 import { describe, expect, it } from 'vitest';
 import { findRecipe } from '../data/recipes';
 import type { IGameState } from '../types/game';
-import { addIngredient, brew, createMenuState, createNewGame, pauseGame, resumeGame, setTimeLeft } from './game-state';
+import {
+  addIngredient,
+  brew,
+  createMenuState,
+  createNewGame,
+  getCauldronValues,
+  pauseGame,
+  pourOut,
+  resumeGame,
+  setTimeLeft,
+} from './game-state';
 
 const firstOf = (): number => 0;
 
@@ -113,5 +123,56 @@ describe('time and pause', () => {
     const paused = pauseGame(state);
     expect(paused.status).toBe('paused');
     expect(resumeGame(paused)).toEqual(state);
+  });
+});
+
+describe('reactions (Level 3)', () => {
+  it('fires Bubbling once on Medium: Magic Power +50% and −10 s', () => {
+    let state = playing({ timeLeft: 100_000, shelfStock: { 'fairy-dust': 5, 'caustic-acid': 5 } });
+    state = addIngredient(state, 'fairy-dust');
+    state = addIngredient(state, 'caustic-acid');
+    expect(state).toMatchObject({ timeLeft: 90_000, lastReactionId: 'bubbling', eventId: 1 });
+    expect(getCauldronValues(state).magicPower).toBe(51);
+
+    state = addIngredient(state, 'fairy-dust');
+    expect(state).toMatchObject({ timeLeft: 90_000, lastReactionId: null, eventId: 1 });
+  });
+
+  it('Volatile Mix on Hard takes a life and clears the cauldron', () => {
+    let state: IGameState = {
+      ...createNewGame('hard', firstOf),
+      shelfStock: { 'phoenix-feather': 2, 'essence-of-the-void': 2 },
+    };
+    state = addIngredient(addIngredient(state, 'phoenix-feather'), 'essence-of-the-void');
+    expect(state).toMatchObject({ lives: 2, lastReactionId: 'volatile-mix' });
+    expect(state.cauldronIngredients).toEqual([]);
+  });
+
+  it('Easy has no reactions', () => {
+    let state: IGameState = {
+      ...createNewGame('easy', firstOf),
+      shelfStock: { 'fairy-dust': 2, 'mandrake-root': 2 },
+    };
+    state = addIngredient(addIngredient(state, 'fairy-dust'), 'mandrake-root');
+    expect(state.lastReactionId).toBeNull();
+  });
+});
+
+describe('pourOut (Level 3)', () => {
+  it('clears the cauldron for 10 s and keeps lives, score and stock', () => {
+    let state = playing({ timeLeft: 60_000, shelfStock: { 'frost-lotus': 3 } });
+    state = pourOut(addIngredient(state, 'frost-lotus'));
+    expect(state).toMatchObject({
+      timeLeft: 50_000,
+      lives: 3,
+      score: 0,
+      shelfStock: { 'frost-lotus': 2 },
+    });
+    expect(state.cauldronIngredients).toEqual([]);
+  });
+
+  it('does nothing with an empty cauldron', () => {
+    const state = playing();
+    expect(pourOut(state)).toBe(state);
   });
 });

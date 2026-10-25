@@ -1,7 +1,16 @@
 import { getTimeLeft } from '../logic/timer';
 import { clearSave, loadGame, saveGame } from '../storage/save';
 import type { Difficulty, IGameState } from '../types/game';
-import { addIngredient, brew, createMenuState, createNewGame, pauseGame, resumeGame, setTimeLeft } from './game-state';
+import {
+  addIngredient,
+  brew,
+  createMenuState,
+  createNewGame,
+  pauseGame,
+  pourOut,
+  resumeGame,
+  setTimeLeft,
+} from './game-state';
 import { getState, setState } from './store';
 
 /*
@@ -31,7 +40,6 @@ function tick(): void {
   if (endTime === null) {
     return;
   }
-  // The timer is not saved every frame: pause and page hide save the exact time
   setState(setTimeLeft(getState(), getTimeLeft(endTime, Date.now())));
   if (getState().status === 'playing') {
     frameId = requestAnimationFrame(tick);
@@ -55,17 +63,30 @@ function syncEndTime(): void {
 }
 
 export function startNewGame(difficulty?: Difficulty): void {
-  // A new game overwrites the old unfinished save
   commit(createNewGame(difficulty ?? getState().difficulty));
   startTimer();
 }
 
 export function addToCauldron(id: string): void {
   commit(addIngredient(getState(), id));
+  if (getState().status === 'playing') {
+    syncEndTime();
+  } else {
+    stopTimer();
+  }
 }
 
 export function brewPotion(): void {
   commit(brew(getState()));
+  if (getState().status === 'playing') {
+    syncEndTime();
+  } else {
+    stopTimer();
+  }
+}
+
+export function pourOutCauldron(): void {
+  commit(pourOut(getState()));
   if (getState().status === 'playing') {
     syncEndTime();
   } else {
@@ -122,12 +143,10 @@ export function initAutoPause(): void {
       pause();
     }
   });
-  // Reload or close: keep the exact time left of a running game
   window.addEventListener('pagehide', () => {
     if (endTime !== null) {
       setState(setTimeLeft(getState(), getTimeLeft(endTime, Date.now())));
     }
-    // Only a running game is saved here: the start screen must keep an older save
     const { status } = getState();
     if (status === 'playing' || status === 'paused') {
       saveGame(getState());

@@ -21,7 +21,10 @@ export function createHud(): IComponent {
 
   const pauseButton = el(
     'button',
-    { className: 'icon-button hud__pause', attrs: { type: 'button', 'aria-label': 'Pause' } },
+    {
+      className: 'icon-button hud__pause',
+      attrs: { type: 'button', 'aria-label': 'Pause', title: 'Pause (P or Esc)' },
+    },
     [createIcon('pause')],
   );
   pauseButton.addEventListener('click', () => {

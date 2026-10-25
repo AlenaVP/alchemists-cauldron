@@ -1,6 +1,11 @@
+import { REACTIONS } from '../data/reactions';
+import { addToCauldron } from '../state/game-controller';
+import { getSettings, isCauldronFull } from '../state/game-state';
+import { getState } from '../state/store';
 import type { IGameState } from '../types/game';
-import { el, setText, type IComponent } from './dom';
+import { el, playAnimation, setText, type IComponent } from './dom';
 import { createIcon } from './icons';
+import { DRAG_TYPE } from './shelf';
 
 /* Static, trusted SVG markup of the cauldron itself. */
 const CAULDRON_SVG = `
@@ -35,6 +40,11 @@ function getStatusMessage(state: IGameState): string {
     case 'playing':
       break;
   }
+  const reaction = REACTIONS.find((item) => item.id === state.lastReactionId);
+  if (reaction) {
+    const effect = reaction.description.split(': ').at(-1) ?? '';
+    return `Reaction — ${reaction.name}! ${effect}`;
+  }
   if (state.lastBrew === 'success') return 'Potion brewed! A new recipe has arrived';
   if (state.lastBrew === 'failure') return 'Wrong mixture! You lost a life';
   if (state.cauldronIngredients.length === 0) return 'Add ingredients from the shelf';
@@ -47,6 +57,10 @@ export function createCauldron(): IComponent {
   visual.append(
     ...Array.from({ length: 4 }, (_, index) => el('span', { className: `bubble bubble--${String(index + 1)}` })),
   );
+  // US 3.5: icons of the added ingredients float inside the cauldron
+  const floaters = el('div', { className: 'cauldron__floaters', attrs: { 'aria-hidden': 'true' } });
+  visual.append(floaters);
+
   const status = el('p', { className: 'cauldron__status', attrs: { 'aria-live': 'polite' } });
   const contents = el('ol', {
     className: 'cauldron__contents',
@@ -58,7 +72,51 @@ export function createCauldron(): IComponent {
     contents,
   ]);
 
+  const canDrop = (): boolean => getState().status === 'playing' && !isCauldronFull(getState());
+
+  element.addEventListener('dragover', (event) => {
+    if (!canDrop() || !event.dataTransfer?.types.includes(DRAG_TYPE)) return;
+    event.preventDefault();
+    event.dataTransfer.dropEffect = 'copy';
+    element.classList.add('cauldron--drop');
+  });
+  element.addEventListener('dragleave', (event) => {
+    if (!(event.relatedTarget instanceof Node && element.contains(event.relatedTarget))) {
+      element.classList.remove('cauldron--drop');
+    }
+  });
+  element.addEventListener('drop', (event) => {
+    event.preventDefault();
+    element.classList.remove('cauldron--drop');
+    const id = event.dataTransfer?.getData(DRAG_TYPE);
+    if (id && canDrop()) addToCauldron(id);
+  });
+
   let renderedContents = '';
+  let renderedEvent = 0;
+
+  /** Visual feedback runs only in CSS; the classes are removed on animationend. */
+  function playFeedback(state: IGameState): void {
+    if (state.lastReactionId) {
+      playAnimation(element, 'fx-reaction', 'reaction-flash');
+      return;
+    }
+    if (state.lastBrew === null) return;
+    const isSuccess = state.lastBrew === 'success';
+    if (isSuccess) {
+      playAnimation(element, 'fx-success', 'success-burst');
+    } else {
+      playAnimation(element, 'fx-failure', 'explode');
+    }
+    const text = el('span', {
+      className: `float-text ${isSuccess ? 'float-text--success' : 'float-text--failure'}`,
+      text: isSuccess ? `+${String(getSettings(state).scorePerBrew)}` : '−1 life',
+    });
+    text.addEventListener('animationend', () => {
+      text.remove();
+    });
+    visual.append(text);
+  }
 
   function update(state: IGameState): void {
     const isActive = state.status !== 'menu';
@@ -67,9 +125,21 @@ export function createCauldron(): IComponent {
     element.classList.toggle('cauldron--failure', state.lastBrew === 'failure');
     setText(status, getStatusMessage(state));
 
+    if (state.eventId !== renderedEvent) {
+      renderedEvent = state.eventId;
+      playFeedback(state);
+    }
+
     const contentsKey = state.cauldronIngredients.map((ingredient) => ingredient.id).join(',');
     if (contentsKey !== renderedContents) {
       renderedContents = contentsKey;
+      floaters.replaceChildren(
+        ...state.cauldronIngredients.map((ingredient, index) => {
+          const icon = createIcon(ingredient.icon, 'floater');
+          icon.style.setProperty('--index', String(index));
+          return icon;
+        }),
+      );
       contents.replaceChildren(
         ...state.cauldronIngredients.map((ingredient) =>
           el('li', { className: 'cauldron__item' }, [

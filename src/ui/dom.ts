@@ -44,3 +44,20 @@ export interface IComponent {
   element: HTMLElement;
   update: (state: IGameState) => void;
 }
+
+/**
+ * Restarts a CSS animation class. The class is removed when the named CSS
+ * animation ends (it may run on a child or a pseudo-element).
+ * Timing lives in CSS: no setTimeout or setInterval for visual effects.
+ */
+export function playAnimation(element: HTMLElement, className: string, animationName: string): void {
+  element.classList.remove(className);
+  element.getBoundingClientRect();
+  element.classList.add(className);
+  const onEnd = (event: AnimationEvent): void => {
+    if (event.animationName !== animationName) return;
+    element.classList.remove(className);
+    element.removeEventListener('animationend', onEnd);
+  };
+  element.addEventListener('animationend', onEnd);
+}

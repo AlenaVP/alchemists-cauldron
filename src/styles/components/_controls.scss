@@ -20,10 +20,52 @@
   }
 }
 
+.controls__center {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  max-width: 560px;
+
+  @include tablet {
+    flex-direction: row;
+  }
+}
+
+.pour-out {
+  @include focus-ring;
+
+  min-height: 40px;
+  padding: 6px 18px;
+  font-family: $font-display;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: $color-density;
+  background: $color-card-end;
+  border: 1px solid rgb(125 211 252 / 50%);
+  border-radius: $radius-lg;
+
+  &[hidden] {
+    display: none;
+  }
+
+  &:disabled {
+    opacity: 0.4;
+  }
+
+  @include tablet {
+    min-height: 60px;
+  }
+}
+
 .main-action {
   @include focus-ring;
 
   flex: 1;
+  width: 100%;
   max-width: 560px;
   min-height: 60px;
   padding: 0 24px;

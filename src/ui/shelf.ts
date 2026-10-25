@@ -6,33 +6,68 @@ import type { IGameState, IIngredient } from '../types/game';
 import { el, setText, type IComponent } from './dom';
 import { createIcon } from './icons';
 
+export const DRAG_TYPE = 'text/plain';
+
 interface ICard {
   button: HTMLButtonElement;
   stock: HTMLElement;
   ingredient: IIngredient;
 }
 
-function createStatChip(label: string, value: number, modifier: string): HTMLElement {
-  return el('span', {
-    className: `chip chip--${modifier}`,
-    text: `${label} ${formatSigned(value)}`,
-  });
+/** Level 3: the numbers live in a tooltip, the card shows only icon, name and stock. */
+function createTooltip(ingredient: IIngredient): HTMLElement {
+  const row = (label: string, value: number, modifier: string): HTMLElement =>
+    el('span', { className: `tooltip__row tooltip__row--${modifier}` }, [
+      el('span', { text: label }),
+      el('b', { text: formatSigned(value) }),
+    ]);
+  return el('span', { className: 'tooltip', attrs: { id: `tooltip-${ingredient.id}`, role: 'tooltip' } }, [
+    el('span', { className: 'tooltip__title', text: ingredient.name }),
+    row('Temperature', ingredient.temperature, 'temp'),
+    row('Density', ingredient.density, 'density'),
+    row('Magic Power', ingredient.magicPower, 'magic'),
+  ]);
 }
 
-function createCard(ingredient: IIngredient): { slot: HTMLLIElement; card: ICard } {
+const TOOLTIP_WIDTH = 230;
+const TOOLTIP_HEIGHT = 150;
+
+/** Opens the tooltip to the left / upward near the screen edges (US 3.2). */
+function placeTooltip(button: HTMLElement): void {
+  const rect = button.getBoundingClientRect();
+  const roomRight = window.innerWidth - rect.right;
+  const fitsSide = roomRight >= TOOLTIP_WIDTH || rect.left >= TOOLTIP_WIDTH;
+  button.classList.toggle('ingredient--tip-below', !fitsSide);
+  button.classList.toggle('ingredient--tip-left', fitsSide && roomRight < TOOLTIP_WIDTH);
+  button.classList.toggle('ingredient--tip-up', window.innerHeight - rect.top < TOOLTIP_HEIGHT + rect.height);
+}
+
+function createCard(ingredient: IIngredient, index: number): { slot: HTMLLIElement; card: ICard } {
   const stock = el('span', { className: 'ingredient__stock' });
   const button = el('button', { className: 'ingredient', attrs: { type: 'button', 'data-id': ingredient.id } }, [
     createIcon(ingredient.icon, 'ingredient__icon'),
     el('span', { className: 'ingredient__name', text: ingredient.name }),
-    el('span', { className: 'ingredient__stats' }, [
-      createStatChip('T', ingredient.temperature, 'temp'),
-      createStatChip('D', ingredient.density, 'density'),
-      createStatChip('MP', ingredient.magicPower, 'magic'),
-    ]),
     stock,
+    el('kbd', {
+      className: 'kbd ingredient__key',
+      text: String(index + 1),
+      attrs: { 'aria-hidden': 'true' },
+    }),
+    createTooltip(ingredient),
   ]);
+  button.setAttribute('aria-describedby', `tooltip-${ingredient.id}`);
   button.addEventListener('click', () => {
     addToCauldron(ingredient.id);
+  });
+  button.addEventListener('mouseenter', () => {
+    placeTooltip(button);
+  });
+  button.addEventListener('focus', () => {
+    placeTooltip(button);
+  });
+  button.addEventListener('dragstart', (event) => {
+    event.dataTransfer?.setData(DRAG_TYPE, ingredient.id);
+    if (event.dataTransfer) event.dataTransfer.effectAllowed = 'copy';
   });
   return {
     slot: el('li', { className: 'shelf__slot' }, [button]),
@@ -61,7 +96,6 @@ export function createShelf(): IComponent {
     const { shelfSize } = getSettings(state);
     cards.length = 0;
     if (state.status === 'menu') {
-      // Start screen: the shelf is empty, only the slots are visible
       const placeholders = Array.from({ length: shelfSize }, () =>
         el('li', {
           className: 'shelf__slot shelf__slot--placeholder',
@@ -71,8 +105,8 @@ export function createShelf(): IComponent {
       grid.replaceChildren(...placeholders);
       return;
     }
-    const slots = getShelfIngredients(shelfSize).map((ingredient) => {
-      const { slot, card } = createCard(ingredient);
+    const slots = getShelfIngredients(shelfSize).map((ingredient, index) => {
+      const { slot, card } = createCard(ingredient, index);
       cards.push(card);
       return slot;
     });
@@ -92,6 +126,7 @@ export function createShelf(): IComponent {
       const portions = getStock(state.shelfStock, ingredient.id);
       const isEmpty = portions <= 0;
       button.disabled = state.status !== 'playing' || isFull || isEmpty;
+      button.draggable = !button.disabled;
       button.classList.toggle('ingredient--empty', isEmpty);
       setText(stock, String(portions));
       button.setAttribute('aria-label', `${ingredient.name}, ${String(portions)} left`);

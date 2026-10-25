@@ -97,3 +97,25 @@
   pointer-events: none;
   filter: blur(10px) grayscale(0.4);
 }
+
+// US 3.5: short screen shake after a failed brew
+.fx-shake {
+  animation: shake 0.45s ease-in-out;
+}
+
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  20%,
+  60% {
+    transform: translateX(-8px);
+  }
+
+  40%,
+  80% {
+    transform: translateX(8px);
+  }
+}
