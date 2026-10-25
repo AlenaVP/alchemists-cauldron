@@ -20,7 +20,7 @@ You are an alchemist with a cauldron, a shelf of ingredients and a ticking clock
 
 1. Press **Start Game**. You get a random recipe and a shelf with a random stock of every ingredient (2–15 portions).
 2. Click ingredient cards to add them to the cauldron. The counter **Ingredients: n / 4** (5 on Hard) shows how full it is; at the maximum the shelf is blocked.
-3. Watch the 3 bars. The bright green zone is the recipe range, the faint zone around it is the allowed tolerance, the gold marker is the current value. A bar glows when its value is inside the recipe range.
+3. Watch the 3 bars (from Level 3, hover a card to see its numbers, or drag it into the cauldron). The bright green zone is the recipe range, the faint zone around it is the allowed tolerance, the gold marker is the current value. A bar glows when its value is inside the recipe range.
 4. Press **Brew**. Every value may miss its range by the tolerance (±8 on Medium).
    - Success: +200 points, +10 s (time never goes above 120 s by a bonus) and a new recipe.
    - Failure: −1 life.
@@ -47,11 +47,43 @@ Controls: **Pause** next to the timer, **Help** and **Settings** (difficulty, co
 - [x] US 2.1 Settings panel with **Easy / Medium / Hard**; every number comes from one `DIFFICULTY_SETTINGS` object (shelf size, cauldron limit, time, tolerance, lives, score, time bonus); the difficulty cannot be changed during a run; one Top-10 list per difficulty with a **Difficulty** column
 - [x] US 2.2 Auto-save after every action, on pause and on page hide; **Continue Game** appears only for a valid unfinished save and opens the game paused with the saved stock; a new game overwrites the save, Exit to Menu and Game Over clear it; broken data is validated and deleted
 
+### Level 3 — Full game
+
+- [x] US 3.1 Drag a card into the cauldron (HTML5 `dragstart` / `dragover` / `dragleave` / `drop`), highlighted drop zone; paused, full or empty-stock drops are ignored; clicks still work
+- [x] US 3.2 Cards show only icon, name and stock; a tooltip with `+` / `−` values opens on hover or keyboard focus, to the left / upward near the screen edges, hidden during pause
+- [x] US 3.3 15 typed reactions in `IReaction[]`; Easy none, Medium 2, Hard 3; values are recalculated from the ingredient list every time, one-time effects only when a reaction changes from not active to active
+- [x] US 3.4 **Pour Out**: clears the cauldron for 10 s, no life lost, ingredients are not returned, disabled when the cauldron is empty
+- [x] US 3.5 CSS-only feedback: success burst, explosion and screen shake on failure, floating icons in the cauldron, floating score text
+- [x] US 3.6 Keyboard shortcuts in one handler, only during active play
+
+### Keyboard
+
+| Key         | Action                                     |
+| ----------- | ------------------------------------------ |
+| `1` – `8`   | add the ingredient from that shelf slot    |
+| `B`         | Brew                                       |
+| `O`         | Pour Out                                   |
+| `P` / `Esc` | Pause                                      |
+| `Enter`     | on the pause screen: Resume (native focus) |
+
+Shortcuts are ignored on the start, pause and Game Over screens, inside dialogs and while typing a name.
+
+### Reactions
+
+| Difficulty | Reactions                              |
+| ---------- | -------------------------------------- |
+| Easy       | none                                   |
+| Medium     | Bubbling, Solar Frost                  |
+| Hard       | Volatile Mix, Rooted Steam, Magma Flux |
+
+Medium uses only the first 6 ingredients, so its reactions are built from them; Hard adds reactions with Phoenix Feather and Toad Slime. Active reactions are listed in the Help dialog.
+
 ### Rule decisions
 
 - **Time bonus.** US 1.3 says "add 10 s up to 120 s", US 1.4 says "never above the start time". The game caps the bonus at 120 s (this satisfies both) and a success never takes time away: at 145 s a success keeps 145 s.
 - **Leaderboard.** A result gets in when the score is above 0 and either the list has fewer than 10 entries or the score is higher than the 10th place (an equal score would rank below the earlier result).
 - **Saved data.** Recipes and ingredients are restored by id from the game tables, so edited numbers in `localStorage` cannot change the rules. Every field is validated; on any problem the save is deleted and the game starts normally.
+- **Reaction values.** Sums first, then every active reaction of the difficulty in table order, rounded to whole numbers. Value changes stay while the combination is active; time and life penalties happen once, when the reaction fires.
 - **Bar scales.** Temperature −100..100, Density −80..80 (0 in the center), Magic Power 0..100. Values outside the scale keep the marker at the edge, the exact number is shown above the bar.
 
 ## Task structure
